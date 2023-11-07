@@ -1,0 +1,44 @@
+---
+title: "Pruebas_Concatenar"
+author: "Isaac Marti"
+date: "2023-11-07"
+output: html_document
+---
+```{r}
+
+library(readr)
+
+ds1 <- read_delim("data/As_DD_2018.csv", 
+    delim = ";", escape_double = FALSE, trim_ws = TRUE)
+
+ds2 <- read_delim("data/B(a)P_DD_2018.csv", 
+    delim = ";", escape_double = FALSE, trim_ws = TRUE)
+
+ds3 <- read_delim("data/Cd_DD_2018.csv", 
+    delim = ";", escape_double = FALSE, trim_ws = TRUE)
+
+ds4 <- read_delim("data/Ni_DD_2018.csv", 
+    delim = ";", escape_double = FALSE, trim_ws = TRUE)
+
+ds5 <- read_delim("data/Pb_DD_2018.csv", 
+    delim = ";", escape_double = FALSE, trim_ws = TRUE)
+
+ds6 <- read_delim("data/PM2.5_DD_2018.csv", 
+    delim = ";", escape_double = FALSE, trim_ws = TRUE)
+
+ds7 <- read_delim("data/PM10_DD_2018.csv", 
+    delim = ";", escape_double = FALSE, trim_ws = TRUE)
+
+```
+
+
+```{r}
+
+library(tidyr)
+library(tidyverse)
+
+ds_c <- rbind(ds1, ds2, ds3, ds4, ds5, ds6, ds7)
+
+ds_t <- pivot_longer(ds_c, -(PROVINCIA:MES),names_to = "DIA", values_to = "VALOR", names_prefix = 'D')
+
+```

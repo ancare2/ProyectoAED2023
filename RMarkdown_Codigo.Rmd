@@ -20,3 +20,67 @@ df2 <- df[, -which(names(df) == "id")]
 
 ```
 
+```{r}
+library(ggplot2)
+
+hist(df2$Edicion, col = c("red", "blue", "green", "purple", "orange", "pink", "cyan"))
+
+
+  
+```
+
+
+```{r}
+
+ggplot(data = df2, aes(x = Edicion, fill = Edicion)) + 
+  geom_bar() +
+  labs(title = "Histograma de las ediciones", x = "Edición", y = "Cantidad")
+
+```
+
+
+```{r}
+# Create the bar plot
+
+ggplot(df2, aes(x = Junta)) +
+  geom_bar() +
+  labs(title = "Bar Plot de las Juntas", x = "Junta", y = "Cantidad") +
+  theme(axis.text.x=element_text(angle=90))
+```
+
+
+```{r}
+ggplot(df2, aes(x = Edad)) +
+  geom_bar() +
+  labs(title = "Bar Plot de las Juntas", x = "Rango edad", y = "Cantidad")
+```
+
+
+```{r}
+
+Sex <- c(sum(grepl(pattern = 'Hombre', df2$Sexo)), sum(grepl(pattern = 'Mujer', df2$Sexo)))
+
+pie(Sex, labels = c('Masculino','Femenino'), col = c('Blue','Red'))
+legend("bottomright", legend = c('Masculino: 60346 (47%)','Femenino: 68032 (53%)'), fill = c('Blue','Red'), 
+       title = "Total: 128378 muestras")
+
+title(main = "Distribución por género", cex.main = 1.5, col.main = "black")
+title(xlab = NULL, ylab = NULL)
+axis(1, labels = FALSE)
+box()
+```
+
+```{r}
+Nac <- c(sum(grepl(pattern = 'Española', df2$Nacionalidad)), sum(grepl(pattern = 'Extranjera', df2$Nacionalidad)))
+
+pie(Nac, labels = c('Esapñola','Exranjera'), col = c('Orange','Green'))
+legend("bottomright", legend = c('Española: 124460 (97%)','Extranjera: 3918 (3%)'), fill = c('Orange','Green'), 
+       title = "Total: 128378 muestras")
+
+title(main = "Distribución por nacionalidad", cex.main = 1.5, col.main = "black")
+title(xlab = NULL, ylab = NULL)
+axis(1, labels = FALSE)
+box()
+```
+
+

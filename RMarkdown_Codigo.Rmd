@@ -6,13 +6,15 @@ output: html_document
 ---
 
 ```{r}
-
 # Importacion del data set
 
 library(readr)
 df <- read_delim("data/procesos_decidimvlc.csv", 
     delim = ";", escape_double = FALSE, trim_ws = TRUE)
+```
 
+
+```{r}
 # Eliminamos la columna id, ya que no aporta información
 df2 <- df[, -which(names(df) == "id")]
 

@@ -5,7 +5,10 @@ date: "`r Sys.Date()`"
 output: html_document
 ---
 
+En primer lugar vamos a importar la base de datos que hemos elegido. Se trata de un dataset del proyecto de participación ciudadana de la ciudad de València, "Decidim València" permite a los ciudadanos de Valencia participar en la toma de decisiones relacionadas con su ciudad y su gobierno local. 
+
 ```{r}
+<<<<<<< HEAD
 # Importacion del data set
 
 library(readr)
@@ -17,9 +20,18 @@ df <- read_delim("data/procesos_decidimvlc.csv",
 ```{r}
 # Eliminamos la columna id, ya que no aporta información
 df2 <- df[, -which(names(df) == "id")]
+=======
+# Importamos los datos
+library(readr)
+df1 <- read_delim("data/procesos_decidimvlc.csv", 
+    delim = ";", escape_double = FALSE, trim_ws = TRUE, show_col_types = FALSE)
+head(df)  
+>>>>>>> ee5b005ef10636fbe19302daa9181694734bc28c
 
+#Show_col_types=false lo hemos puesto porque se han cargado correctamente las columnas de nuestro df, sino podríamos haber especificado manualmente el tipo de datos contenido en cada una de ellas
 ```
 
+<<<<<<< HEAD
 ```{r}
 library(ggplot2)
 
@@ -84,3 +96,36 @@ box()
 ```
 
 
+=======
+Antes de empezar a trabajar vamos a acondicionar nuestros datos.
+En primer lugar hemos decidio eliminar la columna de id ya que no nos aporta información relevante para nuestro análisis
+
+```{r}
+# Eliminamos la columna id, ya que no aporta información
+df2 <- df1[, -which(names(df) == "id")]
+head(df2)
+```
+
+Una vez eliminada dicha columna, vamos a eliminar los "NA" de la columna junta y la de barrio. 
+
+```{r}
+# Eliminamos filas con NA en las columnas "Junta" y "Barrio"
+df<- df2[complete.cases(df2$Junta, df2$Barrio), ]
+```
+
+```{r}
+#Verifico si queda algun na en dichas columnas
+any(is.na(df$Junta))
+any(is.na(df$Barrio))
+```
+Una vez hemos limpiado nuestra base de datos, vamos a dar una visión general de los datos.
+
+En primer lugar mostramos un 
+
+```{r}
+summary(df)
+```
+
+
+
+>>>>>>> ee5b005ef10636fbe19302daa9181694734bc28c

@@ -12,9 +12,58 @@ knitr::opts_chunk$set(echo = TRUE)
 # Código Anna
 # NAs
 
+#interpolacion
 ```{r}
-df <- read_delim("./data/join_datas.csv", 
-                              delim = ",",
-                              show_col_types = FALSE)
+# Cargar la librería readr si no está cargada
+library(readr)
+
+# Cargar el DataFrame desde el archivo CSV
+df <- read_csv("./data/join_datas.csv")
+
+# Realizar la interpolación lineal para imputar NAs
+# Puedes especificar las columnas donde deseas realizar la interpolación
+# En este ejemplo, se realizará la interpolación en todas las columnas numéricas
+df_numeric <- df %>% select_if(is.numeric)
+
+# Aplicar la interpolación solo a las columnas numéricas
+df_imputed <- df_numeric
+for (col_name in colnames(df_numeric)) {
+  df_imputed[[col_name]] <- approx(x = seq_along(df_imputed[[col_name]]), y = df_imputed[[col_name]], xout = seq_along(df_imputed[[col_name]]))$y
+}
+
+# Combinar las columnas numéricas interpoladas con las columnas no numéricas
+df[, colnames(df_numeric)] <- df_imputed
+
+# Guardar el DataFrame con los NAs imputados en un nuevo archivo CSV
+write_csv(df, "join_data_imputed.csv")
+
+```
+```{r}
+# Cargar las librerías necesarias
+library(readr)
+library(sp)
+library(gstat)
+
+# Cargar el DataFrame desde el archivo CSV
+df <- read_csv("./data/join_datas.csv")
+
+# Crear un objeto SpatialPoints
+coordinates(df) <- ~ LONGITUD_G + LATITUD_G
+
+# Especificar las coordenadas de los puntos a interpolar
+# Puedes definir un nuevo DataFrame con las coordenadas donde deseas realizar la interpolación
+# En este ejemplo, asumiremos que deseas interpolar en las mismas ubicaciones que ya tienes en 'df'
+newdata <- df
+
+# Realizar la interpolación utilizando IDW (Inverso de la Distancia Ponderada)
+imputed_data <- idw(As ~ 1, df, newdata = newdata)
+
+# Imputar los valores faltantes en la columna 'As' (puedes repetir el proceso para otras columnas)
+df$As[is.na(df$As)] <- imputed_data[is.na(df$As)]
+
+# Guardar el DataFrame con los NAs imputados en un nuevo archivo CSV
+write_csv(df, "join_data_imputed.csv")
+
+
 ```
 

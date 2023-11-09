@@ -11,6 +11,174 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # Código Anna
 
+# Para 2018
+```{r}
+library(readr)
+
+ds1 <- read_delim("data/2018/Datos_diarios/As_DD_2018.csv", 
+    delim = ";", escape_double = FALSE, trim_ws = TRUE, show_col_types = FALSE)
+
+ds2 <- read_delim("data/2018/Datos_diarios/B(a)P_DD_2018.csv", 
+    delim = ";", escape_double = FALSE, trim_ws = TRUE,  show_col_types = FALSE)
+
+ds3 <- read_delim("data/2018/Datos_diarios/Cd_DD_2018.csv", 
+    delim = ";", escape_double = FALSE, trim_ws = TRUE,  show_col_types = FALSE)
+
+ds4 <- read_delim("data/2018/Datos_diarios/Ni_DD_2018.csv", 
+    delim = ";", escape_double = FALSE, trim_ws = TRUE,  show_col_types = FALSE)
+
+ds5 <- read_delim("data/2018/Datos_diarios/Pb_DD_2018.csv", 
+    delim = ";", escape_double = FALSE, trim_ws = TRUE,  show_col_types = FALSE)
+
+ds6 <- read_delim("data/2018/Datos_diarios/PM2.5_DD_2018.csv", 
+    delim = ";", escape_double = FALSE, trim_ws = TRUE,  show_col_types = FALSE)
+
+ds7 <- read_delim("data/2018/Datos_diarios/PM10_DD_2018.csv", 
+    delim = ";", escape_double = FALSE, trim_ws = TRUE,  show_col_types = FALSE)
+```
+
+```{r warning=FALSE}
+library(tidyr)
+library(tidyverse)
+
+ds_1t <- pivot_longer(ds1, -(PROVINCIA:MES),names_to = "DIA", values_to = "As", names_prefix = 'D')
+ds_2t <- pivot_longer(ds2, -(PROVINCIA:MES),names_to = "DIA", values_to = "BaP", names_prefix = 'D')
+ds_3t <- pivot_longer(ds3, -(PROVINCIA:MES),names_to = "DIA", values_to = "Cd", names_prefix = 'D')
+ds_4t <- pivot_longer(ds4, -(PROVINCIA:MES),names_to = "DIA", values_to = "Ni", names_prefix = 'D')
+ds_5t <- pivot_longer(ds5, -(PROVINCIA:MES),names_to = "DIA", values_to = "Pb", names_prefix = 'D')
+ds_6t <- pivot_longer(ds6, -(PROVINCIA:MES),names_to = "DIA", values_to = "PM2.5", names_prefix = 'D')
+ds_7t <- pivot_longer(ds7, -(PROVINCIA:MES),names_to = "DIA", values_to = "PM10", names_prefix = 'D')
+
+
+ds_1t <- ds_1t[, -which(names(ds_1t) == "MAGNITUD")]
+ds_2t <- ds_2t[, -which(names(ds_2t) == "MAGNITUD")]
+ds_3t <- ds_3t[, -which(names(ds_3t) == "MAGNITUD")]
+ds_4t <- ds_4t[, -which(names(ds_4t) == "MAGNITUD")]
+ds_5t <- ds_5t[, -which(names(ds_5t) == "MAGNITUD")]
+ds_6t <- ds_6t[, -which(names(ds_6t) == "MAGNITUD")]
+ds_7t <- ds_7t[, -which(names(ds_7t) == "MAGNITUD")]
+
+ds_1t <- ds_1t[, -which(names(ds_1t) == "PUNTO_MUESTREO")]
+ds_2t <- ds_2t[, -which(names(ds_2t) == "PUNTO_MUESTREO")]
+ds_3t <- ds_3t[, -which(names(ds_3t) == "PUNTO_MUESTREO")]
+ds_4t <- ds_4t[, -which(names(ds_4t) == "PUNTO_MUESTREO")]
+ds_5t <- ds_5t[, -which(names(ds_5t) == "PUNTO_MUESTREO")]
+ds_6t <- ds_6t[, -which(names(ds_6t) == "PUNTO_MUESTREO")]
+ds_7t <- ds_7t[, -which(names(ds_7t) == "PUNTO_MUESTREO")]
+
+
+z <- merge(ds_1t,ds_2t)
+z <- merge(z,ds_3t)
+z <- merge(z,ds_4t)
+z <- merge(z,ds_5t)
+z <- merge(z,ds_6t)
+z <- merge(z,ds_7t)
+```
+
+```{r}
+library(readxl)
+meta_df <- read_excel("./data/2018/Metadatos/metainformacion_2018_tcm30-501408.xlsx", sheet="Estaciones evaluación 2018")
+meta_df<-meta_df[meta_df$N_CCAA=='CCAA Com. Valenciana',]
+```
+
+
+```{r}
+library(dplyr)
+library(tidyr)
+z_2018<-merge(meta_df,z, by=c('PROVINCIA','MUNICIPIO','ESTACION'))
+columnas<-c(colnames(z),'LATITUD_G','LONGITUD_G','ZONA')
+z_2018<-z_2018[,columnas]
+#view(z_2018)
+```
+    
+
+
+
+
+
+
+
+# Para 2019
+```{r}
+library(readr)
+
+ds1 <- read_delim("data/2019/Datos_diarios/As_DD_2019.csv", 
+    delim = ";", escape_double = FALSE, trim_ws = TRUE, show_col_types = FALSE)
+
+ds2 <- read_delim("data/2019/Datos_diarios/BaP_DD_2019.csv", 
+    delim = ";", escape_double = FALSE, trim_ws = TRUE,  show_col_types = FALSE)
+
+ds3 <- read_delim("data/2019/Datos_diarios/C6H6_DD_2019.csv", 
+    delim = ";", escape_double = FALSE, trim_ws = TRUE,  show_col_types = FALSE)
+
+ds4 <- read_delim("data/2019/Datos_diarios/Ni_DD_2019.csv", 
+    delim = ";", escape_double = FALSE, trim_ws = TRUE,  show_col_types = FALSE)
+
+ds5 <- read_delim("data/2019/Datos_diarios/Pb_DD_2019.csv", 
+    delim = ";", escape_double = FALSE, trim_ws = TRUE,  show_col_types = FALSE)
+
+ds6 <- read_delim("data/2019/Datos_diarios/PM10_DD_2019.csv", 
+    delim = ";", escape_double = FALSE, trim_ws = TRUE,  show_col_types = FALSE)
+
+ds7 <- read_delim("data/2019/Datos_diarios/PM25_DD_2019.csv", 
+    delim = ";", escape_double = FALSE, trim_ws = TRUE,  show_col_types = FALSE)
+```
+
+```{r warning=FALSE}
+library(tidyr)
+library(tidyverse)
+
+ds_1t <- pivot_longer(ds1, -(PROVINCIA:MES),names_to = "DIA", values_to = "As", names_prefix = 'D')
+ds_2t <- pivot_longer(ds2, -(PROVINCIA:MES),names_to = "DIA", values_to = "BaP", names_prefix = 'D')
+ds_3t <- pivot_longer(ds3, -(PROVINCIA:MES),names_to = "DIA", values_to = "Cd", names_prefix = 'D')
+ds_4t <- pivot_longer(ds4, -(PROVINCIA:MES),names_to = "DIA", values_to = "Ni", names_prefix = 'D')
+ds_5t <- pivot_longer(ds5, -(PROVINCIA:MES),names_to = "DIA", values_to = "Pb", names_prefix = 'D')
+ds_6t <- pivot_longer(ds6, -(PROVINCIA:MES),names_to = "DIA", values_to = "PM2.5", names_prefix = 'D')
+ds_7t <- pivot_longer(ds7, -(PROVINCIA:MES),names_to = "DIA", values_to = "PM10", names_prefix = 'D')
+
+
+ds_1t <- ds_1t[, -which(names(ds_1t) == "MAGNITUD")]
+ds_2t <- ds_2t[, -which(names(ds_2t) == "MAGNITUD")]
+ds_3t <- ds_3t[, -which(names(ds_3t) == "MAGNITUD")]
+ds_4t <- ds_4t[, -which(names(ds_4t) == "MAGNITUD")]
+ds_5t <- ds_5t[, -which(names(ds_5t) == "MAGNITUD")]
+ds_6t <- ds_6t[, -which(names(ds_6t) == "MAGNITUD")]
+ds_7t <- ds_7t[, -which(names(ds_7t) == "MAGNITUD")]
+
+ds_1t <- ds_1t[, -which(names(ds_1t) == "PUNTO_MUESTREO")]
+ds_2t <- ds_2t[, -which(names(ds_2t) == "PUNTO_MUESTREO")]
+ds_3t <- ds_3t[, -which(names(ds_3t) == "PUNTO_MUESTREO")]
+ds_4t <- ds_4t[, -which(names(ds_4t) == "PUNTO_MUESTREO")]
+ds_5t <- ds_5t[, -which(names(ds_5t) == "PUNTO_MUESTREO")]
+ds_6t <- ds_6t[, -which(names(ds_6t) == "PUNTO_MUESTREO")]
+ds_7t <- ds_7t[, -which(names(ds_7t) == "PUNTO_MUESTREO")]
+
+
+z <- merge(ds_1t,ds_2t)
+z <- merge(z,ds_3t)
+z <- merge(z,ds_4t)
+z <- merge(z,ds_5t)
+z <- merge(z,ds_6t)
+z <- merge(z,ds_7t)
+```
+
+```{r}
+library(readxl)
+meta_df <- read_excel("./data/2019/Metadatos/metainformacion_2019_tcm30-513561.xlsx", sheet="Estaciones evaluación 2019")
+meta_df<-meta_df[meta_df$N_RED=='CCAA Com. Valenciana',]
+```
+
+
+```{r}
+library(dplyr)
+library(tidyr)
+z_2019<-merge(meta_df,z, by=c('PROVINCIA','MUNICIPIO','ESTACION'))
+columnas<-c(colnames(z),'LATITUD_G','LONGITUD_G','ZONA')
+z_2019<-z_2019[,columnas]
+#view(z_2019)
+```
+    
+
 # Para 2020
 ```{r}
 library(readr)
@@ -88,10 +256,91 @@ library(dplyr)
 library(tidyr)
 z_2020<-merge(meta_df,z, by=c('PROVINCIA','MUNICIPIO','ESTACION'))
 columnas<-c(colnames(z),'LATITUD_G','LONGITUD_G','ZONA')
-z2<-z2[,columnas]
+z_2020<-z_2020[,columnas]
 #view(z_2020)
 ```
     
+# Para 2021
+```{r}
+library(readr)
+
+ds1 <- read_delim("data/2021/Datos_diarios/As_DD_2021.csv", 
+    delim = ";", escape_double = FALSE, trim_ws = TRUE, show_col_types = FALSE)
+
+ds2 <- read_delim("data/2021/Datos_diarios/BaP_DD_2021.csv", 
+    delim = ";", escape_double = FALSE, trim_ws = TRUE,  show_col_types = FALSE)
+
+ds3 <- read_delim("data/2021/Datos_diarios/Cd_DD_2021.csv", 
+    delim = ";", escape_double = FALSE, trim_ws = TRUE,  show_col_types = FALSE)
+
+ds4 <- read_delim("data/2021/Datos_diarios/Ni_DD_2021.csv", 
+    delim = ";", escape_double = FALSE, trim_ws = TRUE,  show_col_types = FALSE)
+
+ds5 <- read_delim("data/2021/Datos_diarios/Pb_DD_2021.csv", 
+    delim = ";", escape_double = FALSE, trim_ws = TRUE,  show_col_types = FALSE)
+
+ds6 <- read_delim("data/2021/Datos_diarios/PM10_DD_2021.csv", 
+    delim = ";", escape_double = FALSE, trim_ws = TRUE,  show_col_types = FALSE)
+
+ds7 <- read_delim("data/2021/Datos_diarios/PM25_DD_2021.csv", 
+    delim = ";", escape_double = FALSE, trim_ws = TRUE,  show_col_types = FALSE)
+```
+
+```{r warning=FALSE}
+library(tidyr)
+library(tidyverse)
+
+ds_1t <- pivot_longer(ds1, -(PROVINCIA:MES),names_to = "DIA", values_to = "As", names_prefix = 'D')
+ds_2t <- pivot_longer(ds2, -(PROVINCIA:MES),names_to = "DIA", values_to = "BaP", names_prefix = 'D')
+ds_3t <- pivot_longer(ds3, -(PROVINCIA:MES),names_to = "DIA", values_to = "Cd", names_prefix = 'D')
+ds_4t <- pivot_longer(ds4, -(PROVINCIA:MES),names_to = "DIA", values_to = "Ni", names_prefix = 'D')
+ds_5t <- pivot_longer(ds5, -(PROVINCIA:MES),names_to = "DIA", values_to = "Pb", names_prefix = 'D')
+ds_6t <- pivot_longer(ds6, -(PROVINCIA:MES),names_to = "DIA", values_to = "PM2.5", names_prefix = 'D')
+ds_7t <- pivot_longer(ds7, -(PROVINCIA:MES),names_to = "DIA", values_to = "PM10", names_prefix = 'D')
+
+
+ds_1t <- ds_1t[, -which(names(ds_1t) == "MAGNITUD")]
+ds_2t <- ds_2t[, -which(names(ds_2t) == "MAGNITUD")]
+ds_3t <- ds_3t[, -which(names(ds_3t) == "MAGNITUD")]
+ds_4t <- ds_4t[, -which(names(ds_4t) == "MAGNITUD")]
+ds_5t <- ds_5t[, -which(names(ds_5t) == "MAGNITUD")]
+ds_6t <- ds_6t[, -which(names(ds_6t) == "MAGNITUD")]
+ds_7t <- ds_7t[, -which(names(ds_7t) == "MAGNITUD")]
+
+ds_1t <- ds_1t[, -which(names(ds_1t) == "PUNTO_MUESTREO")]
+ds_2t <- ds_2t[, -which(names(ds_2t) == "PUNTO_MUESTREO")]
+ds_3t <- ds_3t[, -which(names(ds_3t) == "PUNTO_MUESTREO")]
+ds_4t <- ds_4t[, -which(names(ds_4t) == "PUNTO_MUESTREO")]
+ds_5t <- ds_5t[, -which(names(ds_5t) == "PUNTO_MUESTREO")]
+ds_6t <- ds_6t[, -which(names(ds_6t) == "PUNTO_MUESTREO")]
+ds_7t <- ds_7t[, -which(names(ds_7t) == "PUNTO_MUESTREO")]
+
+
+z <- merge(ds_1t,ds_2t)
+z <- merge(z,ds_3t)
+z <- merge(z,ds_4t)
+z <- merge(z,ds_5t)
+z <- merge(z,ds_6t)
+z <- merge(z,ds_7t)
+```
+
+```{r}
+library(readxl)
+meta_df <- read_excel("./data/2021/Metadatos/metainformacion2021_tcm30-545563.xlsx", sheet="Estaciones")
+meta_df<-meta_df[meta_df$N_RED=='CCAA Com. Valenciana',]
+```
+
+
+```{r}
+library(dplyr)
+library(tidyr)
+z_2021<-merge(meta_df,z, by=c('PROVINCIA','MUNICIPIO','ESTACION'))
+columnas<-c(colnames(z),'LATITUD_G','LONGITUD_G','ZONA')
+z_2021<-z_2021[,columnas]
+#view(z_2021)
+```
+    
+
 
 
 
@@ -171,7 +420,7 @@ library(dplyr)
 library(tidyr)
 z_2022<-merge(meta_df,z, by=c('PROVINCIA','MUNICIPIO','ESTACION'))
 columnas<-c(colnames(z),'LATITUD_G','LONGITUD_G','ZONA')
-z_2022<-z2[,columnas]
+z_2022<-z_2022[,columnas]
 #view(z_2022)
 ```
     

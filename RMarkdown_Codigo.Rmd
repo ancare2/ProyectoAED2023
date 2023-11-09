@@ -5,16 +5,80 @@ date: "`r Sys.Date()`"
 output: html_document
 ---
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 En primer lugar vamos a importar la base de datos que hemos elegido. Se trata de un dataset del proyecto de participación ciudadana de la ciudad de València, "Decidim València" permite a los ciudadanos de Valencia participar en la toma de decisiones relacionadas con su ciudad y su gobierno local. 
 
 ```{r}
 # Importamos los datos
 library(readr)
+library(dplyr)
+
 df1 <- read_delim("data/procesos_decidimvlc.csv", 
     delim = ";", escape_double = FALSE, trim_ws = TRUE, show_col_types = FALSE)
-head(df)  
+head(df1)  
 
 #Show_col_types=false lo hemos puesto porque se han cargado correctamente las columnas de nuestro df, sino podríamos haber especificado manualmente el tipo de datos contenido en cada una de ellas
+
+
 ```
 
 Antes de empezar a trabajar vamos a acondicionar nuestros datos.
@@ -22,7 +86,7 @@ En primer lugar hemos decidio eliminar la columna de id ya que no nos aporta inf
 
 ```{r}
 # Eliminamos la columna id, ya que no aporta información
-df2 <- df1[, -which(names(df) == "id")]
+df2 <- df1[, -which(names(df1) == "id")]
 head(df2)
 ```
 
@@ -40,11 +104,88 @@ any(is.na(df$Barrio))
 ```
 Una vez hemos limpiado nuestra base de datos, vamos a dar una visión general de los datos.
 
-En primer lugar mostramos un 
+En primer lugar, vemos el número de filas y columnas de nuestra base de datos por hacernos una idea del número de registros con los que estamos trabajando.
+
+```{r}
+dim(df)  
+```
+Tenemos un total de 1238378 filas/ registros y 3 columnas que serán las variables que utilizaremos para realizar nuestro análisis.
+
+
+En segundo lugar mostramos un resumen que nos proporciona la función "summary" con los estadísticos más importantes de cada columna de nuestra dataframe.
 
 ```{r}
 summary(df)
 ```
 
+A continuación, visualicemos algunas variables específicas. Realizamos un análisis visual de la variable categórica sexo
 
+```{r}
+library(ggplot2) 
+ggplot(df1, aes(x = Sexo)) +
+  geom_bar(fill = "blue") +
+  labs(title = "Distribución de Género", x = "Género", y = "Número de Personas")
+
+```
+
+Como podemos ver en la distribucción de género, hay número mayor de mujeres que de hombres, tienen una mayor participación en esta asociación.
+
+Vamos a realizar la gráfica de la variable categórica nacionalidad ya que posteriormente la utilizaremos en nombrosas ocasiones para nuestro análisis.
+
+```{r}
+library(ggplot2)
+
+ggplot(data = df, aes(x = Nacionalidad)) +
+  geom_bar(fill = "green") +
+  labs(title = "Distribución de Nacionalidad", x = "Nacionalidad", y = "Frecuencia") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) 
+```
+
+Como podemos observar hay una mayor cantidad de registros para personas españolas que extrengeras. Luego analizaremos la implicación en cada caso.
+
+
+Después de realizar las gráficas para las variables categóricas vamos a visualizar variables numéricas.
+
+
+```{r}
+library(ggplot2)
+
+ggplot(data = df, aes(x = Edad)) +
+  geom_bar(fill = "lightblue") +
+  labs(title = "Distribución de Edad", x = "Intervalo de Edad", y = "Frecuencia")
+```
+
+Como podemos observar la mayor participación se encuentra en la franja de edad [35-44] años. 
+
+
+```{r}
+# Crear un gráfico de barras para la distribución de "Número de propuestas que apoya"
+library(ggplot2)
+
+ggplot(data = df1, aes(x = `Numero de propuestas que apoya`)) +
+  geom_bar(fill = "lightgreen") +
+  labs(title = "Distribución de Número de propuestas que apoya", x = "Número de propuestas que apoya", y = "Frecuencia")
+
+```
+
+```{r}
+# Crear un gráfico de barras para la distribución de "Numero de propuestas que vota"
+library(ggplot2)
+
+ggplot(data = df1, aes(x = `Numero de propuestas que vota`)) +
+  geom_bar(fill = "lightcoral") +
+  labs(title = "Distribución de Numero de propuestas que vota", x = "Numero de propuestas que vota", y = "Frecuencia")
+
+
+```
+
+```{r}
+# Crear un gráfico de barras para la distribución de "Edicion"
+library(ggplot2)
+
+ggplot(data = df1, aes(x = Edicion)) +
+  geom_bar(fill = "lightblue") +
+  labs(title = "Distribución de Edicion", x = "Edicion", y = "Frecuencia")
+
+```
 

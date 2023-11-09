@@ -1,0 +1,12 @@
+---
+title: "Codigo_Anna"
+author: "Anna Cabrerizo Requena"
+date: "2023-11-09"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Código Anna

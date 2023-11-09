@@ -77,7 +77,7 @@ z <- merge(z,ds_7t)
 
 ```{r}
 library(readxl)
-meta_df <- read_excel("data/2020/Metadatos/metainformacion2020_tcm30-545563.xlsx", 
+meta_df <- read_excel("./data/2020/Metadatos/metainformacionestacionesymagnitudes2020_tcm30-531266.xlsx", 
     sheet = "Estaciones")
 meta_df<-meta_df[meta_df$N_RED=='CCAA Com. Valenciana',]
 ```
@@ -86,38 +86,38 @@ meta_df<-meta_df[meta_df$N_RED=='CCAA Com. Valenciana',]
 ```{r}
 library(dplyr)
 library(tidyr)
-z2<-merge(meta_df,z, by=c('PROVINCIA','MUNICIPIO','ESTACION'))
+z_2020<-merge(meta_df,z, by=c('PROVINCIA','MUNICIPIO','ESTACION'))
 columnas<-c(colnames(z),'LATITUD_G','LONGITUD_G','ZONA')
 z2<-z2[,columnas]
-view(z2)
+#view(z_2020)
 ```
     
 
 
 
-# Para 2021
+# Para 2022
 ```{r}
 library(readr)
 
-ds1 <- read_delim("data/2021/As_DD_2021.csv", 
+ds1 <- read_delim("data/2022/Datos_diarios/As_DD_2022.csv", 
     delim = ";", escape_double = FALSE, trim_ws = TRUE, show_col_types = FALSE)
 
-ds2 <- read_delim("data/2021/BaP_DD_2021.csv", 
+ds2 <- read_delim("data/2022/Datos_diarios/B(a)P_DD_2022.csv", 
     delim = ";", escape_double = FALSE, trim_ws = TRUE,  show_col_types = FALSE)
 
-ds3 <- read_delim("data/2021/Cd_DD_2021.csv", 
+ds3 <- read_delim("data/2022/Datos_diarios/Cd_DD_2022.csv", 
     delim = ";", escape_double = FALSE, trim_ws = TRUE,  show_col_types = FALSE)
 
-ds4 <- read_delim("data/2021/Ni_DD_2021.csv", 
+ds4 <- read_delim("data/2022/Datos_diarios/Ni_DD_2022.csv", 
     delim = ";", escape_double = FALSE, trim_ws = TRUE,  show_col_types = FALSE)
 
-ds5 <- read_delim("data/2021/Pb_DD_2021.csv", 
+ds5 <- read_delim("data/2022/Datos_diarios/Pb_DD_2022.csv", 
     delim = ";", escape_double = FALSE, trim_ws = TRUE,  show_col_types = FALSE)
 
-ds6 <- read_delim("data/2021/PM25_DD_2021.csv", 
+ds6 <- read_delim("data/2022/Datos_diarios/PM2.5_DD_2022.csv", 
     delim = ";", escape_double = FALSE, trim_ws = TRUE,  show_col_types = FALSE)
 
-ds7 <- read_delim("data/2021/PM10_DD_2021.csv", 
+ds7 <- read_delim("data/2022/Datos_diarios/PM10_DD_2022.csv", 
     delim = ";", escape_double = FALSE, trim_ws = TRUE,  show_col_types = FALSE)
 ```
 
@@ -161,8 +161,7 @@ z <- merge(z,ds_7t)
 
 ```{r}
 library(readxl)
-meta_df <- read_excel("data/2021/Metadatos/metainformacion2021_tcm30-545563.xlsx", 
-    sheet = "Estaciones")
+meta_df <- read_excel("./data/2022/Metadatos/Metainformacion2022.xlsx", sheet="Estaciones")
 meta_df<-meta_df[meta_df$N_RED=='CCAA Com. Valenciana',]
 ```
 
@@ -170,10 +169,10 @@ meta_df<-meta_df[meta_df$N_RED=='CCAA Com. Valenciana',]
 ```{r}
 library(dplyr)
 library(tidyr)
-z2<-merge(meta_df,z, by=c('PROVINCIA','MUNICIPIO','ESTACION'))
+z_2022<-merge(meta_df,z, by=c('PROVINCIA','MUNICIPIO','ESTACION'))
 columnas<-c(colnames(z),'LATITUD_G','LONGITUD_G','ZONA')
-z2<-z2[,columnas]
-view(z2)
+z_2022<-z2[,columnas]
+#view(z_2022)
 ```
     
 

@@ -173,7 +173,7 @@ meta_df<-meta_df[meta_df$N_RED=='CCAA Com. Valenciana',]
 ```{r}
 library(dplyr)
 library(tidyr)
-z_2019<-merge.data.frame(meta_df2,z, by=c('PROVINCIA','MUNICIPIO','ESTACION'))
+z_2019<-merge.data.frame(meta_df,z, by=c('PROVINCIA','MUNICIPIO','ESTACION'))
 columnas<-c(colnames(z),'LATITUD_G','LONGITUD_G','ZONA')
 z_2019<-z_2019[,columnas]
 #view(z_2019)

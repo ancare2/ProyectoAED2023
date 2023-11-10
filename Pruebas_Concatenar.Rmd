@@ -17,7 +17,7 @@ ds2 <- read_delim("data/2018/B(a)P_DD_2018.csv",
 ds3 <- read_delim("data/2018/Cd_DD_2018.csv", 
     delim = ";", escape_double = FALSE, trim_ws = TRUE)
 
-ds4 <- read_delim("data/2018/2018/Ni_DD_2018.csv", 
+ds4 <- read_delim("data/2018/Ni_DD_2018.csv", 
     delim = ";", escape_double = FALSE, trim_ws = TRUE)
 
 ds5 <- read_delim("data/2018/Pb_DD_2018.csv", 

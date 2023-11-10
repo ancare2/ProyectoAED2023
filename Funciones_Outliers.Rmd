@@ -1,0 +1,103 @@
+---
+title: "Funciones Outliers"
+author: "Isaac Marti"
+date: "2023-11-10"
+output: html_document
+---
+
+# Método 3-Sigma
+
+```{r}
+library(readr)
+df <- read_csv("data/join_datas.csv")
+
+
+# Define a function to detect outliers using the 3-sigma rule and ignore NA
+find_outliers_3sigma <- function(x) {
+  x <- na.omit(x)
+  mean_val <- mean(x)
+  sd_val <- sd(x)
+  lower_bound <- mean_val - 3 * sd_val
+  upper_bound <- mean_val + 3 * sd_val
+  outliers <- x[x < lower_bound | x > upper_bound]
+  positions <- which(x %in% outliers)
+  return(list(values = outliers, positions = positions))
+}
+
+```
+
+# Método IQR(Boxplot)
+
+```{r}
+
+
+find_outliers_iqr <- function(x) {
+  x <- na.omit(x)
+  q1 <- quantile(x, 0.25)
+  q3 <- quantile(x, 0.75)
+  iqr <- q3 - q1
+  lower_bound <- q1 - 1.5 * iqr
+  upper_bound <- q3 + 1.5 * iqr
+  outliers <- x[x < lower_bound | x > upper_bound]
+  positions <- which(x %in% outliers)
+  return(list(values = outliers, positions = positions))
+}
+
+```
+
+# Método del Hampel
+
+```{r}
+
+find_outliers_hampel <- function(df_column, k = 3) {
+  x <- na.omit(df_column)
+  med <- median(x)
+  mad <- median(abs(x - med))
+  threshold <- k * 1.4826 * mad
+  outliers <- x[abs(x - med) > threshold]
+  positions <- which(df_column %in% outliers)
+  return(list(values = outliers, positions = positions))
+}
+
+```
+
+# Método de los percentiles
+
+```{r}
+
+find_outliers_percentile <- function(x) {
+  x <- na.omit(x)
+  lower_bound <- quantile(x, 0.05)
+  upper_bound<- quantile(x, 0.95)
+  outliers <- x[x < lower_bound | x > upper_bound]
+  positions <- which(x %in% outliers)
+  return(list(values = outliers, positions = positions))
+}
+```
+
+
+```{r}
+
+
+columns_to_analyze <- c("As", "BaP", "Cd", "Ni", "Pb", "PM2.5", "PM10")
+
+outliers_3sigma_list <- lapply(df[columns_to_analyze], find_outliers_3sigma)
+outliers_hampel_list <- lapply(df[columns_to_analyze], find_outliers_hampel)
+outliers_iqr_list <- lapply(df[columns_to_analyze], find_outliers_iqr)
+outliers_percentile_list <- lapply(df[columns_to_analyze], find_outliers_percentile)
+
+print("Outliers detectados usando la regla 3-sigma:")
+#print(outliers_3sigma_list)
+
+print("Outliers detected using Hampel identifier:")
+#print(outliers_hampel_list)
+
+print("Outliers detected using IQR(Boxplot):")
+#print(outliers_iqr_list)
+
+print("Outliers detected using IQR:")
+#print(outliers_percentile_list)
+
+```
+
+

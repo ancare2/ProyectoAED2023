@@ -258,13 +258,25 @@ Con un total de nueve archivos Excel que detallan parámetros de mediciones hora
 
 # Formato tidy
 
-En primer lugar, debíamos obtener un dataset de todos nuestros registros. Para ello,  
+En un primer paso, se emprendió la tarea de obtener un conjunto de datos consolidado a partir de nuestros registros. Este proceso involucró un análisis detallado de cada año, con el objetivo de integrar las columnas correspondientes a las observaciones diarias de diversos agentes químicos del aire presentes en cada hoja de Excel. La finalidad era fusionar estas columnas en una única entidad independiente, que contuviera todas las observaciones de dicho parámetro durante los cuatro años contemplados en el estudio.
+
+Este enfoque permitió la generación de un conjunto de datos estructurado de manera "tidy", donde cada variable se representaba en una columna individual y cada observación de una variable ocupaba una fila independiente. La consolidación de las diversas tablas y hojas de Excel se llevó a cabo considerando las variables comunes, es decir, los parámetros del aire analizados. Como resultado, nuestro nuevo dataset presentaba una primera fila que contenía los nombres representativos de las variables, estableciendo así un marco coherente para el análisis subsiguiente.
 
 
+```{r}
 
+```
 
 
 # Limpieza de datos
+
+
+
+
+
+
+
+
 
 
 

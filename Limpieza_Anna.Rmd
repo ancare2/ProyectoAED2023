@@ -10,32 +10,35 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 # Código Anna
+# NAs
 
-# Para 2018
+#interpolacion
 ```{r}
+# Cargar la librería readr si no está cargada
 library(readr)
 
-ds1 <- read_delim("data/2018/Datos_diarios/As_DD_2018.csv", 
-    delim = ";", escape_double = FALSE, trim_ws = TRUE, show_col_types = FALSE)
+# Cargar el DataFrame desde el archivo CSV
+df <- read_csv("./data/join_datas.csv")
 
-ds2 <- read_delim("data/2018/Datos_diarios/B(a)P_DD_2018.csv", 
-    delim = ";", escape_double = FALSE, trim_ws = TRUE,  show_col_types = FALSE)
+# Realizar la interpolación lineal para imputar NAs
+# Puedes especificar las columnas donde deseas realizar la interpolación
+# En este ejemplo, se realizará la interpolación en todas las columnas numéricas
+df_numeric <- df %>% select_if(is.numeric)
 
-ds3 <- read_delim("data/2018/Datos_diarios/Cd_DD_2018.csv", 
-    delim = ";", escape_double = FALSE, trim_ws = TRUE,  show_col_types = FALSE)
+# Aplicar la interpolación solo a las columnas numéricas
+df_imputed <- df_numeric
+for (col_name in colnames(df_numeric)) {
+  df_imputed[[col_name]] <- approx(x = seq_along(df_imputed[[col_name]]), y = df_imputed[[col_name]], xout = seq_along(df_imputed[[col_name]]))$y
+}
 
-ds4 <- read_delim("data/2018/Datos_diarios/Ni_DD_2018.csv", 
-    delim = ";", escape_double = FALSE, trim_ws = TRUE,  show_col_types = FALSE)
+# Combinar las columnas numéricas interpoladas con las columnas no numéricas
+df[, colnames(df_numeric)] <- df_imputed
 
-ds5 <- read_delim("data/2018/Datos_diarios/Pb_DD_2018.csv", 
-    delim = ";", escape_double = FALSE, trim_ws = TRUE,  show_col_types = FALSE)
+# Guardar el DataFrame con los NAs imputados en un nuevo archivo CSV
+write_csv(df, "join_data_imputed.csv")
 
-ds6 <- read_delim("data/2018/Datos_diarios/PM2.5_DD_2018.csv", 
-    delim = ";", escape_double = FALSE, trim_ws = TRUE,  show_col_types = FALSE)
-
-ds7 <- read_delim("data/2018/Datos_diarios/PM10_DD_2018.csv", 
-    delim = ";", escape_double = FALSE, trim_ws = TRUE,  show_col_types = FALSE)
 ```
+<<<<<<< HEAD
 
 ```{r warning=FALSE}
 library(tidyr)
@@ -67,13 +70,14 @@ ds_6t <- ds_6t[, -which(names(ds_6t) == "PUNTO_MUESTREO")]
 ds_7t <- ds_7t[, -which(names(ds_7t) == "PUNTO_MUESTREO")]
 
 
-z <- merge(ds_1t,ds_2t)
-z <- merge(z,ds_3t)
-z <- merge(z,ds_4t)
-z <- merge(z,ds_5t)
-z <- merge(z,ds_6t)
-z <- merge(z,ds_7t)
+z <- merge(ds_1t,ds_2t, all=TRUE)
+z <- merge(z,ds_3t,all=TRUE)
+z <- merge(z,ds_4t,all=TRUE)
+z <- merge(z,ds_5t,all=TRUE)
+z <- merge(z,ds_6t,all=TRUE)
+z <- merge(z,ds_7t,all=TRUE)
 ```
+
 
 ```{r}
 library(readxl)
@@ -90,29 +94,35 @@ columnas<-c(colnames(z),'LATITUD_G','LONGITUD_G','ZONA')
 z_2018<-z_2018[,columnas]
 #view(z_2018)
 ```
-    
-
-
-
-
-
-
+   
 
 # Para 2019
+=======
+>>>>>>> dc384e68f3d0c8565921bae71addfd59cb7d1a5f
 ```{r}
+# Cargar las librerías necesarias
 library(readr)
+library(sp)
+library(gstat)
 
-ds1 <- read_delim("data/2019/Datos_diarios/As_DD_2019.csv", 
-    delim = ";", escape_double = FALSE, trim_ws = TRUE, show_col_types = FALSE)
+# Cargar el DataFrame desde el archivo CSV
+df <- read_csv("./data/join_datas.csv")
 
-ds2 <- read_delim("data/2019/Datos_diarios/BaP_DD_2019.csv", 
-    delim = ";", escape_double = FALSE, trim_ws = TRUE,  show_col_types = FALSE)
+# Crear un objeto SpatialPoints
+coordinates(df) <- ~ LONGITUD_G + LATITUD_G
 
+# Especificar las coordenadas de los puntos a interpolar
+# Puedes definir un nuevo DataFrame con las coordenadas donde deseas realizar la interpolación
+# En este ejemplo, asumiremos que deseas interpolar en las mismas ubicaciones que ya tienes en 'df'
+newdata <- df
 
+# Realizar la interpolación utilizando IDW (Inverso de la Distancia Ponderada)
+imputed_data <- idw(As ~ 1, df, newdata = newdata)
 
-ds4 <- read_delim("data/2019/Datos_diarios/Ni_DD_2019.csv", 
-    delim = ";", escape_double = FALSE, trim_ws = TRUE,  show_col_types = FALSE)
+# Imputar los valores faltantes en la columna 'As' (puedes repetir el proceso para otras columnas)
+df$As[is.na(df$As)] <- imputed_data[is.na(df$As)]
 
+<<<<<<< HEAD
 ds5 <- read_delim("data/2019/Datos_diarios/Pb_DD_2019.csv", 
     delim = ";", escape_double = FALSE, trim_ws = TRUE,  show_col_types = FALSE)
 
@@ -152,12 +162,12 @@ ds_5t <- ds_5t[, -which(names(ds_5t) == "PUNTO_MUESTREO")]
 ds_6t <- ds_6t[, -which(names(ds_6t) == "PUNTO_MUESTREO")]
 ds_7t <- ds_7t[, -which(names(ds_7t) == "PUNTO_MUESTREO")]
 
-z <- merge(ds_1t,ds_2t)
+z <- merge(ds_1t,ds_2t, all=TRUE)
 
-z <- merge(z,ds_4t)
-z <- merge(z,ds_5t)
-z <- merge(z,ds_6t)
-z <- merge(z,ds_7t)
+z <- merge(z,ds_4t,all=TRUE)
+z <- merge(z,ds_5t,all=TRUE)
+z <- merge(z,ds_6t,all=TRUE)
+z <- merge(z,ds_7t,all=TRUE)
 
 ```
 
@@ -165,10 +175,15 @@ z <- merge(z,ds_7t)
 library(readxl)
 meta_df <- read_excel("./data/2019/Metadatos/metainformacion_2019_tcm30-513561.xlsx", sheet="Estaciones evaluación 2019")
 meta_df<-meta_df[meta_df$N_RED=='CCAA Com. Valenciana',]
+=======
+# Guardar el DataFrame con los NAs imputados en un nuevo archivo CSV
+write_csv(df, "join_data_imputed.csv")
+>>>>>>> dc384e68f3d0c8565921bae71addfd59cb7d1a5f
 
 
 ```
 
+<<<<<<< HEAD
 
 ```{r}
 library(dplyr)
@@ -236,12 +251,12 @@ ds_6t <- ds_6t[, -which(names(ds_6t) == "PUNTO_MUESTREO")]
 ds_7t <- ds_7t[, -which(names(ds_7t) == "PUNTO_MUESTREO")]
 
 
-z <- merge(ds_1t,ds_2t)
-z <- merge(z,ds_3t)
-z <- merge(z,ds_4t)
-z <- merge(z,ds_5t)
-z <- merge(z,ds_6t)
-z <- merge(z,ds_7t)
+z <- merge(ds_1t,ds_2t, all=TRUE)
+z <- merge(z,ds_3t,all=TRUE)
+z <- merge(z,ds_4t,all=TRUE)
+z <- merge(z,ds_5t,all=TRUE)
+z <- merge(z,ds_6t,all=TRUE)
+z <- merge(z,ds_7t,all=TRUE)
 ```
 
 ```{r}
@@ -317,12 +332,12 @@ ds_6t <- ds_6t[, -which(names(ds_6t) == "PUNTO_MUESTREO")]
 ds_7t <- ds_7t[, -which(names(ds_7t) == "PUNTO_MUESTREO")]
 
 
-z <- merge(ds_1t,ds_2t)
-z <- merge(z,ds_3t)
-z <- merge(z,ds_4t)
-z <- merge(z,ds_5t)
-z <- merge(z,ds_6t)
-z <- merge(z,ds_7t)
+z <- merge(ds_1t,ds_2t, all=TRUE)
+z <- merge(z,ds_3t,all=TRUE)
+z <- merge(z,ds_4t,all=TRUE)
+z <- merge(z,ds_5t,all=TRUE)
+z <- merge(z,ds_6t,all=TRUE)
+z <- merge(z,ds_7t,all=TRUE)
 ```
 
 ```{r}
@@ -401,12 +416,12 @@ ds_6t <- ds_6t[, -which(names(ds_6t) == "PUNTO_MUESTREO")]
 ds_7t <- ds_7t[, -which(names(ds_7t) == "PUNTO_MUESTREO")]
 
 
-z <- merge(ds_1t,ds_2t)
-z <- merge(z,ds_3t)
-z <- merge(z,ds_4t)
-z <- merge(z,ds_5t)
-z <- merge(z,ds_6t)
-z <- merge(z,ds_7t)
+z <- merge(ds_1t,ds_2t, all=TRUE)
+z <- merge(z,ds_3t,all=TRUE)
+z <- merge(z,ds_4t,all=TRUE)
+z <- merge(z,ds_5t,all=TRUE)
+z <- merge(z,ds_6t,all=TRUE)
+z <- merge(z,ds_7t,all=TRUE)
 ```
 
 ```{r}
@@ -431,3 +446,5 @@ z_final<-rbind(z_2018,z_2019,z_2020,z_2021,z_2022)
 write.csv(z_final, "data/join_datas.csv")
 ```
 
+=======
+>>>>>>> dc384e68f3d0c8565921bae71addfd59cb7d1a5f

@@ -7,23 +7,30 @@ output: html_document
 
 
 ```{r}
-library(readxl)
+library(readr)
+library(dplyr)
+library(tidyr)
 main_root<-'data'
-carpetas<-dir(main_root)
-subcarpetas<-c()
-for (c in carpetas[2]){
-  subcarpetas<-dir(paste(main_root,c,sep='/'))
-  for (s in subcarpetas){
+carpetas<-c('2018','2019')#,'2020','2021','2022')
+subcarpeta1<-'Datos_diarios'
+for (c in carpetas){
+  files<-dir(paste(main_root,c,subcarpeta1,sep='/'))
+  df_t<-list()
+  i=1
+  for (file in files){
+    ds1 <- read_delim(paste(main_root,c,subcarpeta1,file,sep='/'), 
+    delim = ";", escape_double = FALSE, trim_ws = TRUE)
+    ds_1t <- pivot_longer(ds1, -(PROVINCIA:MES),names_to = "DIA", values_to = file, names_prefix = 'D')
+    ds_1t <- ds_1t[, -which(names(ds_1t) == "MAGNITUD")]
+    ds_1t <- ds_1t[, -which(names(ds_1t) == "PUNTO_MUESTREO")]
+    df_t[[i]]<-ds_1t
+    i=i+1
     
-    
-    
-    metadf<- read_excel(paste(main_root,c,sep='/'), 
-    sheet = "Estaciones")
-  
   }
 }
 
 
+df_t[1]
 ```
 
 
@@ -110,6 +117,19 @@ z2<-merge(meta_df,z, by=c('PROVINCIA','MUNICIPIO','ESTACION'))
 columnas<-c(colnames(z),'LATITUD_G','LONGITUD_G','ZONA')
 z2<-z2[,columnas]
 
+```
+    
+```{r}
+library(readr)
+df <- read_csv("data/join_datas.csv")
+```
+```{r}
+df_castellon<-ds_1t[ds_1t$PROVINCIA==12,]
+
+```
+    
+```{r}
+ds_1t
 ```
     
     

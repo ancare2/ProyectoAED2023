@@ -67,13 +67,14 @@ ds_6t <- ds_6t[, -which(names(ds_6t) == "PUNTO_MUESTREO")]
 ds_7t <- ds_7t[, -which(names(ds_7t) == "PUNTO_MUESTREO")]
 
 
-z <- merge(ds_1t,ds_2t)
-z <- merge(z,ds_3t)
-z <- merge(z,ds_4t)
-z <- merge(z,ds_5t)
-z <- merge(z,ds_6t)
-z <- merge(z,ds_7t)
+z <- merge(ds_1t,ds_2t, all=TRUE)
+z <- merge(z,ds_3t,all=TRUE)
+z <- merge(z,ds_4t,all=TRUE)
+z <- merge(z,ds_5t,all=TRUE)
+z <- merge(z,ds_6t,all=TRUE)
+z <- merge(z,ds_7t,all=TRUE)
 ```
+
 
 ```{r}
 library(readxl)
@@ -90,13 +91,7 @@ columnas<-c(colnames(z),'LATITUD_G','LONGITUD_G','ZONA')
 z_2018<-z_2018[,columnas]
 #view(z_2018)
 ```
-    
-
-
-
-
-
-
+   
 
 # Para 2019
 ```{r}
@@ -152,12 +147,12 @@ ds_5t <- ds_5t[, -which(names(ds_5t) == "PUNTO_MUESTREO")]
 ds_6t <- ds_6t[, -which(names(ds_6t) == "PUNTO_MUESTREO")]
 ds_7t <- ds_7t[, -which(names(ds_7t) == "PUNTO_MUESTREO")]
 
-z <- merge(ds_1t,ds_2t)
+z <- merge(ds_1t,ds_2t, all=TRUE)
 
-z <- merge(z,ds_4t)
-z <- merge(z,ds_5t)
-z <- merge(z,ds_6t)
-z <- merge(z,ds_7t)
+z <- merge(z,ds_4t,all=TRUE)
+z <- merge(z,ds_5t,all=TRUE)
+z <- merge(z,ds_6t,all=TRUE)
+z <- merge(z,ds_7t,all=TRUE)
 
 ```
 
@@ -173,7 +168,7 @@ meta_df<-meta_df[meta_df$N_RED=='CCAA Com. Valenciana',]
 ```{r}
 library(dplyr)
 library(tidyr)
-z_2019<-merge.data.frame(meta_df2,z, by=c('PROVINCIA','MUNICIPIO','ESTACION'))
+z_2019<-merge.data.frame(meta_df,z, by=c('PROVINCIA','MUNICIPIO','ESTACION'))
 columnas<-c(colnames(z),'LATITUD_G','LONGITUD_G','ZONA')
 z_2019<-z_2019[,columnas]
 #view(z_2019)
@@ -236,12 +231,12 @@ ds_6t <- ds_6t[, -which(names(ds_6t) == "PUNTO_MUESTREO")]
 ds_7t <- ds_7t[, -which(names(ds_7t) == "PUNTO_MUESTREO")]
 
 
-z <- merge(ds_1t,ds_2t)
-z <- merge(z,ds_3t)
-z <- merge(z,ds_4t)
-z <- merge(z,ds_5t)
-z <- merge(z,ds_6t)
-z <- merge(z,ds_7t)
+z <- merge(ds_1t,ds_2t, all=TRUE)
+z <- merge(z,ds_3t,all=TRUE)
+z <- merge(z,ds_4t,all=TRUE)
+z <- merge(z,ds_5t,all=TRUE)
+z <- merge(z,ds_6t,all=TRUE)
+z <- merge(z,ds_7t,all=TRUE)
 ```
 
 ```{r}
@@ -317,12 +312,12 @@ ds_6t <- ds_6t[, -which(names(ds_6t) == "PUNTO_MUESTREO")]
 ds_7t <- ds_7t[, -which(names(ds_7t) == "PUNTO_MUESTREO")]
 
 
-z <- merge(ds_1t,ds_2t)
-z <- merge(z,ds_3t)
-z <- merge(z,ds_4t)
-z <- merge(z,ds_5t)
-z <- merge(z,ds_6t)
-z <- merge(z,ds_7t)
+z <- merge(ds_1t,ds_2t, all=TRUE)
+z <- merge(z,ds_3t,all=TRUE)
+z <- merge(z,ds_4t,all=TRUE)
+z <- merge(z,ds_5t,all=TRUE)
+z <- merge(z,ds_6t,all=TRUE)
+z <- merge(z,ds_7t,all=TRUE)
 ```
 
 ```{r}
@@ -401,12 +396,12 @@ ds_6t <- ds_6t[, -which(names(ds_6t) == "PUNTO_MUESTREO")]
 ds_7t <- ds_7t[, -which(names(ds_7t) == "PUNTO_MUESTREO")]
 
 
-z <- merge(ds_1t,ds_2t)
-z <- merge(z,ds_3t)
-z <- merge(z,ds_4t)
-z <- merge(z,ds_5t)
-z <- merge(z,ds_6t)
-z <- merge(z,ds_7t)
+z <- merge(ds_1t,ds_2t, all=TRUE)
+z <- merge(z,ds_3t,all=TRUE)
+z <- merge(z,ds_4t,all=TRUE)
+z <- merge(z,ds_5t,all=TRUE)
+z <- merge(z,ds_6t,all=TRUE)
+z <- merge(z,ds_7t,all=TRUE)
 ```
 
 ```{r}

@@ -1,7 +1,7 @@
 ---
-title: Full title of the paper (Capitalized)
+title: Trabajo Análisis Exploratorio de Datos
 author:
-  - name: Luis Miguel Rioja Gallo
+  - name: Luis Miguel Rioja Gallo, Anna Cabrerizo Requena
     affil: 1,2,\ddagger,*
     orcid: 0000-0003-3293-2315
   - name: John Doe
@@ -9,10 +9,9 @@ author:
 affiliation:
   - num: 1
     address: |
-      Muenster University of Applied Sciences - 
-      Institute for Infrastructure, Water, Resources, Environment
-      Correnstr. 25, 48149 Muenster, Germany
-    email: leutnant@fh-muenster.de
+      Universitat de València - 
+      Etse. Burjassot, València
+    email: ancare2@alumne.uv.es
   - num: 2
     address: |
       Your department
@@ -137,13 +136,6 @@ output:
     extra_dependencies: longtable
 ---
 
-# Version
-
-This Rmd-skeleton uses the mdpi Latex template published 2023-03-25. 
-However, the official template gets more frequently updated than the **rticles**
-package. Therefore, please make sure prior to paper submission, that you're 
-using the most recent .cls, .tex and .bst files 
-(available [here](http://www.mdpi.com/authors/latex)).
 
 # Article Header Information
 
@@ -239,7 +231,7 @@ addhighlights: |
 
 \startlandscape
 ```{r, mdpinames, echo=FALSE, results='asis'}
-mdpi_journals <- "acoustics, actuators, addictions, admsci, adolescents, aerobiology, aerospace, agriculture, agriengineering, agrochemicals, agronomy, ai, air, algorithms, allergies, alloys, analytica, analytics, anatomia, animals, antibiotics, antibodies, antioxidants, applbiosci, appliedchem, appliedmath, applmech, applmicrobiol, applnano, applsci, aquacj, architecture, arm, arthropoda, arts, asc, asi, astronomy, atmosphere, atoms, audiolres, automation, axioms, bacteria, batteries, bdcc, behavsci, beverages, biochem, bioengineering, biologics, biology, biomass, biomechanics, biomed, biomedicines, biomedinformatics, biomimetics, biomolecules, biophysica, biosensors, biotech, birds, bloods, blsf, brainsci, breath, buildings, businesses, cancers, carbon, cardiogenetics, catalysts, cells, ceramics, challenges, chemengineering, chemistry, chemosensors, chemproc, children, chips, cimb, civileng, cleantechnol, climate, clinpract, clockssleep, cmd, coasts, coatings, colloids, colorants, commodities, compounds, computation, computers, condensedmatter, conservation, constrmater, cosmetics, covid, crops, cryptography, crystals, csmf, ctn, curroncol, cyber, dairy, data, ddc, dentistry, dermato, dermatopathology, designs, devices, diabetology, diagnostics, dietetics, digital, disabilities, diseases, diversity, dna, drones, dynamics, earth, ebj, ecologies, econometrics, economies, education, ejihpe, electricity, electrochem, electronicmat, electronics, encyclopedia, endocrines, energies, eng, engproc, entomology, entropy, environments, environsciproc, epidemiologia, epigenomes, est, fermentation, fibers, fintech, fire, fishes, fluids, foods, forecasting, forensicsci, forests, foundations, fractalfract, fuels, future, futureinternet, futurepharmacol, futurephys, futuretransp, galaxies, games, gases, gastroent, gastrointestdisord, gels, genealogy, genes, geographies, geohazards, geomatics, geosciences, geotechnics, geriatrics, grasses, gucdd, hazardousmatters, healthcare, hearts, hemato, hematolrep, heritage, higheredu, highthroughput, histories, horticulturae, hospitals, humanities, humans, hydrobiology, hydrogen, hydrology, hygiene, idr, ijerph, ijfs, ijgi, ijms, ijns, ijpb, ijtm, ijtpp, ime, immuno, informatics, information, infrastructures, inorganics, insects, instruments, inventions, iot, j, jal, jcdd, jcm, jcp, jcs, jcto, jdb, jeta, jfb, jfmk, jimaging, jintelligence, jlpea, jmmp, jmp, jmse, jne, jnt, jof, joitmc, jor, journalmedia, jox, jpm, jrfm, jsan, jtaer, jvd, jzbg, kidneydial, kinasesphosphatases, knowledge, land, languages, laws, life, liquids, literature, livers, logics, logistics, lubricants, lymphatics, machines, macromol, magnetism, magnetochemistry, make, marinedrugs, materials, materproc, mathematics, mca, measurements, medicina, medicines, medsci, membranes, merits, metabolites, metals, meteorology, methane, metrology, micro, microarrays, microbiolres, micromachines, microorganisms, microplastics, minerals, mining, modelling, molbank, molecules, mps, msf, mti, muscles, nanoenergyadv, nanomanufacturing, nanomaterials, ncrna, ndt, network, neuroglia, neurolint, neurosci, nitrogen, notspecified, nri, nursrep, nutraceuticals, nutrients, obesities, oceans, ohbm, onco, oncopathology, optics, oral, organics, organoids, osteology, oxygen, parasites, parasitologia, particles, pathogens, pathophysiology, pediatrrep, pharmaceuticals, pharmaceutics, pharmacoepidemiology, pharmacy, philosophies, photochem, photonics, phycology, physchem, physics, physiologia, plants, plasma, platforms, pollutants, polymers, polysaccharides, poultry, powders, preprints, proceedings, processes, prosthesis, proteomes, psf, psych, psychiatryint, psychoactives, publications, quantumrep, quaternary, qubs, radiation, reactions, receptors, recycling, regeneration, religions, remotesensing, reports, reprodmed, resources, rheumato, risks, robotics, ruminants, safety, sci, scipharm, sclerosis, seeds, sensors, separations, sexes, signals, sinusitis, skins, smartcities, sna, societies, socsci, software, soilsystems, solar, solids, spectroscj, sports, standards, stats, std, stresses, surfaces, surgeries, suschem, sustainability, symmetry, synbio, systems, targets, taxonomy, technologies, telecom, test, textiles, thalassrep, thermo, tomography, tourismhosp, toxics, toxins, transplantology, transportation, traumacare, traumas, tropicalmed, universe, urbansci, uro, vaccines, vehicles, venereology, vetsci, vibration, virtualworlds, viruses, vision, waste, water, wem, wevj, wind, women, world, youth, zoonoticdis"
+mdpi_journals <- "agriculture, agriengineering, agrochemicals, agronomy, ai, air, algorithms, atmosphere, biochem, bioengineering, biologics, biology, biophysica, carbon, climate, clinpract, clockssleep, cmd, covid, crops, dairy, data, ddc, earth, ebj, ecologies, education, environments, environsciproc, epidemiologia, gases, C6H6, CO_HH, NO_HH, N02_HH, NOx_HH, O3_HH, PM10, PM25, S02_HH"
 
 knitr::kable(rticles::string_to_table(mdpi_journals, 8),
              col.names = NULL,
@@ -254,45 +246,82 @@ knitr::kable(rticles::string_to_table(mdpi_journals, 8),
 
 
 
-# Introduction
-
-The introduction should briefly place the study in a broad context and highlight
-why it is important. It should define the purpose of the work and its
-significance. The current state of the research field should be reviewed
-carefully and key publications cited. Please highlight controversial and
-diverging hypotheses when necessary. Finally, briefly mention the main aim of
-the work and highlight the principal conclusions. As far as possible, please
-keep the introduction comprehensible to scientists outside your particular
-field of research. Citing a journal paper [@bertrand-krajewski_distribution_1998;
-@leutnant_stormwater_2016]. And now citing a book reference @gujer_systems_2008.
-Some MDPI journals use Chicago and others use APA, this template should choose
-the correct citation format for you once you specify the journal in the YAML
-header.
-
-To use endnotes, change `endnotes: true` in the YAML header, then use
-`\endnote{This is an endnote.}`.
+# Introducción
 
 
-# Materials and Methods
+# Procesamiento de Datos
 
-Materials and Methods should be described with sufficient details to allow 
-others to replicate and build on published results. Please note that publication 
-of your manuscript implicates that you must make all materials, data, computer 
-code, and protocols associated with the publication available to readers. Please
-disclose at the submission stage any restrictions on the availability of 
-materials or information. New methods and protocols should be described in 
-detail while well-established methods can be briefly described and appropriately
-cited.
+Este trabajo se centra en el procesamiento de datos en el ámbito del análisis de la calidad del aire, abordando un conjunto de datos recopilado durante los años 2019-2022. Inicialmente, el dataset presentaba desafíos inherentes, como la presencia de valores faltantes y una estructura no tidy. La tarea principal consistió en transformar esta información en un formato "tidy", eliminamos valores ausentes y garantizamos la coherencia de los datos.
 
-Research manuscripts reporting large datasets that are deposited in a publicly 
-available database should specify where the data have been deposited and provide
-the relevant accession numbers. If the accession numbers have not yet been
-obtained at the time of submission, please state that they will be provided
-during review. They must be provided prior to publication.
+Con un total de nueve archivos Excel que detallan parámetros de mediciones horarias del aire, el dataset depurado establece una base sólida para análisis estadísticos univariantes y bivariantes que nos permitirán abordar las cuestiones principales de nuestro estudio.
 
-Interventionary studies involving animals or humans, and other studies require
-ethical approval must list the authority that provided approval and the
-corresponding ethical approval code.
+
+# Formato tidy
+
+En primer lugar, debíamos obtener un dataset de todos nuestros registros. Para ello,  
+
+
+
+
+
+# Limpieza de datos
+
+
+
+
+# Análisis Univariante
+
+
+# Análisis Bivariante
+
+
+
+
+
+
+# Conclusiones
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 # Results
 

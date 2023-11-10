@@ -5,187 +5,191 @@ date: "`r Sys.Date()`"
 output: html_document
 ---
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-En primer lugar vamos a importar la base de datos que hemos elegido. Se trata de un dataset del proyecto de participación ciudadana de la ciudad de València, "Decidim València" permite a los ciudadanos de Valencia participar en la toma de decisiones relacionadas con su ciudad y su gobierno local. 
-
 ```{r}
-# Importamos los datos
 library(readr)
 library(dplyr)
-
-df1 <- read_delim("data/procesos_decidimvlc.csv", 
-    delim = ";", escape_double = FALSE, trim_ws = TRUE, show_col_types = FALSE)
-head(df1)  
-
-#Show_col_types=false lo hemos puesto porque se han cargado correctamente las columnas de nuestro df, sino podríamos haber especificado manualmente el tipo de datos contenido en cada una de ellas
+library(tidyr)
+library(readxl)
+main_root<-'data'
+carpetas<-c('2019','2020','2021','2022')
+subcarpeta1<-'Datos_diarios'
+z_f<-list()
+n=1
+for (c in carpetas){
+  files<-dir(paste(main_root,c,subcarpeta1,sep='/'))
+  df_t<-list()
+  n=n+1
+  i=1
+  for (file in files){
+    ds1 <- read_delim(paste(main_root,c,subcarpeta1,file,sep='/'), 
+    delim = ";", escape_double = FALSE, trim_ws = TRUE)
+    ds1<-ds1[ds1$PROVINCIA==3|ds1$PROVINCIA==12|ds1$PROVINCIA==46,]
+    ds_1t <- pivot_longer(ds1, -(PROVINCIA:DIA),names_to = "HORA", values_to = 'Valor', names_prefix = 'H')
+    ds_1t <- ds_1t[, -which(names(ds_1t) == "MAGNITUD")]
+    ds_1t <- ds_1t[, -which(names(ds_1t) == "PUNTO_MUESTREO")]
+    ds_1t<-mutate(ds_1t,Fecha=ymd(paste(ANNO,MES,DIA,sep='-')))
+    ds_1t<-select(ds_1t,-c('ANNO','MES','DIA'))
+    ds_1t <- ds_1t %>% 
+    group_by(Fecha,MUNICIPIO,PROVINCIA,ESTACION) %>%
+    summarise(Valor=mean(Valor))
+    new_name=strsplit(file,'_')[[1]][1]
+    ds_1t[new_name]<-ds_1t$Valor
+    ds_1t<-select(ds_1t,-c('Valor'))
+    df_t[[i]]<-ds_1t
+    i=i+1
+  }
+  
+  z<-merge(df_t[1],df_t[2],all=TRUE)
+  for (i in 3:length(df_t)){
+    z<-merge(z,df_t[i],all=TRUE)
+  }     
+z_f[[n]]<-z
+}
 
 
 ```
 
-Antes de empezar a trabajar vamos a acondicionar nuestros datos.
-En primer lugar hemos decidio eliminar la columna de id ya que no nos aporta información relevante para nuestro análisis
 
-```{r}
-# Eliminamos la columna id, ya que no aporta información
-df2 <- df1[, -which(names(df1) == "id")]
-head(df2)
-```
-
-Una vez eliminada dicha columna, vamos a eliminar los "NA" de la columna junta y la de barrio. 
-
-```{r}
-# Eliminamos filas con NA en las columnas "Junta" y "Barrio"
-df<- df2[complete.cases(df2$Junta, df2$Barrio), ]
-```
-
-```{r}
-#Verifico si queda algun na en dichas columnas
-any(is.na(df$Junta))
-any(is.na(df$Barrio))
-```
-Una vez hemos limpiado nuestra base de datos, vamos a dar una visión general de los datos.
-
-En primer lugar, vemos el número de filas y columnas de nuestra base de datos por hacernos una idea del número de registros con los que estamos trabajando.
-
-```{r}
-dim(df)  
-```
-Tenemos un total de 1238378 filas/ registros y 3 columnas que serán las variables que utilizaremos para realizar nuestro análisis.
+Cada elemento de la lista es un dataframe, el elemento 1 es del 2019 y asi hasta 2022.
 
 
-En segundo lugar mostramos un resumen que nos proporciona la función "summary" con los estadísticos más importantes de cada columna de nuestra dataframe.
-
-```{r}
-summary(df)
-```
-
-A continuación, visualicemos algunas variables específicas. Realizamos un análisis visual de la variable categórica sexo
-
-```{r}
-library(ggplot2) 
-ggplot(df1, aes(x = Sexo)) +
-  geom_bar(fill = "blue") +
-  labs(title = "Distribución de Género", x = "Género", y = "Número de Personas")
-
-```
-
-Como podemos ver en la distribucción de género, hay número mayor de mujeres que de hombres, tienen una mayor participación en esta asociación.
-
-Vamos a realizar la gráfica de la variable categórica nacionalidad ya que posteriormente la utilizaremos en nombrosas ocasiones para nuestro análisis.
-
-```{r}
-library(ggplot2)
-
-ggplot(data = df, aes(x = Nacionalidad)) +
-  geom_bar(fill = "green") +
-  labs(title = "Distribución de Nacionalidad", x = "Nacionalidad", y = "Frecuencia") +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) 
-```
-
-Como podemos observar hay una mayor cantidad de registros para personas españolas que extrengeras. Luego analizaremos la implicación en cada caso.
-
-
-Después de realizar las gráficas para las variables categóricas vamos a visualizar variables numéricas.
+    
+# Para 2019
 
 
 ```{r}
-library(ggplot2)
 
-ggplot(data = df, aes(x = Edad)) +
-  geom_bar(fill = "lightblue") +
-  labs(title = "Distribución de Edad", x = "Intervalo de Edad", y = "Frecuencia")
+meta_df <- read_excel("./data/2019/Metadatos/metainformacion_2019_tcm30-513561.xlsx", sheet="Estaciones evaluación 2019")
+meta_df<-meta_df[meta_df$N_RED=='CCAA Com. Valenciana',]
+
+
 ```
-
-Como podemos observar la mayor participación se encuentra en la franja de edad [35-44] años. 
 
 
 ```{r}
-# Crear un gráfico de barras para la distribución de "Número de propuestas que apoya"
-library(ggplot2)
 
-ggplot(data = df1, aes(x = `Numero de propuestas que apoya`)) +
-  geom_bar(fill = "lightgreen") +
-  labs(title = "Distribución de Número de propuestas que apoya", x = "Número de propuestas que apoya", y = "Frecuencia")
-
+z<-z_f[1]
+z_2019<-merge.data.frame(meta_df,z, by=c('PROVINCIA','MUNICIPIO','ESTACION'))
+columnas<-c(colnames(z),'LATITUD_G','LONGITUD_G','ZONA')
+z_2019<-z_2019[,columnas]
+#view(z_2019)
 ```
+    
+
+# Para 2020
+
 
 ```{r}
-# Crear un gráfico de barras para la distribución de "Numero de propuestas que vota"
-library(ggplot2)
 
-ggplot(data = df1, aes(x = `Numero de propuestas que vota`)) +
-  geom_bar(fill = "lightcoral") +
-  labs(title = "Distribución de Numero de propuestas que vota", x = "Numero de propuestas que vota", y = "Frecuencia")
-
-
+meta_df <- read_excel("./data/2020/Metadatos/metainformacionestacionesymagnitudes2020_tcm30-531266.xlsx", 
+    sheet = "Estaciones")
+meta_df<-meta_df[meta_df$N_RED=='CCAA Com. Valenciana',]
 ```
+
 
 ```{r}
-# Crear un gráfico de barras para la distribución de "Edicion"
-library(ggplot2)
 
-ggplot(data = df1, aes(x = Edicion)) +
-  geom_bar(fill = "lightblue") +
-  labs(title = "Distribución de Edicion", x = "Edicion", y = "Frecuencia")
-
+z<-z_f[2]
+z_2020<-merge(meta_df,z, by=c('PROVINCIA','MUNICIPIO','ESTACION'))
+columnas<-c(colnames(z),'LATITUD_G','LONGITUD_G','ZONA')
+z_2020<-z_2020[,columnas]
+#view(z_2020)
 ```
+    
+# Para 2021
+
+```{r}
+
+meta_df <- read_excel("./data/2021/Metadatos/metainformacion2021_tcm30-545563.xlsx", sheet="Estaciones")
+meta_df<-meta_df[meta_df$N_RED=='CCAA Com. Valenciana',]
+```
+
+
+```{r}
+
+z<-z_f[3]
+z_2021<-merge(meta_df,z, by=c('PROVINCIA','MUNICIPIO','ESTACION'))
+columnas<-c(colnames(z),'LATITUD_G','LONGITUD_G','ZONA')
+z_2021<-z_2021[,columnas]
+#view(z_2021)
+```
+    
+# Para 2022
+
+```{r}
+
+meta_df <- read_excel("./data/2022/Metadatos/Metainformacion2022.xlsx", sheet="Estaciones")
+meta_df<-meta_df[meta_df$N_RED=='CCAA Com. Valenciana',]
+unique(meta_df$PROVINCIA)
+```
+
+
+```{r}
+
+z<-z_f[4]
+z_2022<-merge(meta_df,z, by=c('PROVINCIA','MUNICIPIO','ESTACION'))
+columnas<-c(colnames(z),'LATITUD_G','LONGITUD_G','ZONA')
+z_2022<-z_2022[,columnas]
+#view(z_2022)
+```
+
+
+    
+```{r}
+z_final<-rbind(z_2018,z_2019,z_2020,z_2021,z_2022)
+#write.csv(z_final, "data/join_datas.csv")
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

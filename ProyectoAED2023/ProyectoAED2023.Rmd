@@ -251,28 +251,224 @@ knitr::kable(rticles::string_to_table(mdpi_journals, 8),
 
 # Procesamiento de Datos
 
-Este trabajo se centra en el procesamiento de datos en el ámbito del análisis de la calidad del aire, abordando un conjunto de datos recopilado durante los años 2019-2022. Inicialmente, el dataset presentaba desafíos inherentes, como la presencia de valores faltantes y una estructura no tidy. La tarea principal consistió en transformar esta información en un formato "tidy", eliminamos valores ausentes y garantizamos la coherencia de los datos.
+Este trabajo se centra en el procesamiento de datos en el ámbito del análisis de la calidad del aire, abordando un conjunto de datos recopilados durante los años 2019-2022. Inicialmente, el dataset presentaba desafíos inherentes, como la presencia de valores faltantes y una estructura no tidy. La tarea principal consistió en transformar esta información en un formato "tidy", eliminamos valores ausentes y garantizamos la coherencia de los datos.
 
 Con un total de nueve archivos Excel que detallan parámetros de mediciones horarias del aire, el dataset depurado establece una base sólida para análisis estadísticos univariantes y bivariantes que nos permitirán abordar las cuestiones principales de nuestro estudio.
 
 
 # Formato tidy
 
-En un primer paso, se emprendió la tarea de obtener un conjunto de datos consolidado a partir de nuestros registros. Este proceso involucró un análisis detallado de cada año, con el objetivo de integrar las columnas correspondientes a las observaciones diarias de diversos agentes químicos del aire presentes en cada hoja de Excel. La finalidad era fusionar estas columnas en una única entidad independiente, que contuviera todas las observaciones de dicho parámetro durante los cuatro años contemplados en el estudio.
+En un primer paso, emprendemos la tarea de obtener un conjunto de datos consolidado a partir de nuestros registros. Este proceso implica un análisis detallado de cada año, con el objetivo de integrar las columnas correspondientes a las observaciones diarias de diversos agentes químicos del aire presentes en cada hoja de Excel. En concreto, disponemos de medidas de Partículas en suspensión (PM10), Partículas en suspensión (PM2,5), Ozono troposférico (O3), Dióxido de nitrógeno (NO2) y Dióxido de azufre (SO2). La finalidad es fusionar estas columnas en una única entidad independiente que contenga todas las observaciones de dicho parámetro durante los cuatro años contemplados en el estudio.
 
-Este enfoque permitió la generación de un conjunto de datos estructurado de manera "tidy", donde cada variable se representaba en una columna individual y cada observación de una variable ocupaba una fila independiente. La consolidación de las diversas tablas y hojas de Excel se llevó a cabo considerando las variables comunes, es decir, los parámetros del aire analizados. Como resultado, nuestro nuevo dataset presentaba una primera fila que contenía los nombres representativos de las variables, estableciendo así un marco coherente para el análisis subsiguiente.
+Este enfoque permite la generación de un conjunto de datos estructurado de manera "tidy", donde cada variable se representa en una columna individual y cada observación de una variable ocupa una fila independiente. La consolidación de las diversas tablas y hojas de Excel se lleva a cabo considerando las variables comunes, es decir, los parámetros del aire analizados. Como resultado, nuestro nuevo dataset presenta una primera fila que contiene los nombres representativos de las variables, estableciendo así un marco coherente para el análisis subsiguiente.
 
 
-```{r}
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+library(dplyr)
+library(tidyr)
+library(readxl)
+library(lubridate)
+main_root<-'data'
+carpetas<-c('2018','2019','2020','2021','2022')
+subcarpeta1<-'Datos_diarios'
+z_f<-list()
+n=0
+for (c in carpetas){
+  files<-dir(paste(main_root,c,subcarpeta1,sep='/'))
+  df_t<-list()
+  names<-list()
+  n=n+1
+  i=1
+  for (file in files){
+    ds1 <- read_delim(paste(main_root,c,subcarpeta1,file,sep='/'), 
+    delim = ";", escape_double = FALSE, trim_ws = TRUE)
+    ds1<-ds1[ds1$PROVINCIA==3|ds1$PROVINCIA==12|ds1$PROVINCIA==46,]
+    ds_1t <- pivot_longer(ds1, -(PROVINCIA:DIA),names_to = "HORA", values_to = 'Valor', names_prefix = 'H')
+    ds_1t <- ds_1t[, -which(names(ds_1t) == "MAGNITUD")]
+    ds_1t <- ds_1t[, -which(names(ds_1t) == "PUNTO_MUESTREO")]
+    ds_1t<-mutate(ds_1t,Fecha=ymd(paste(ANNO,MES,DIA,sep='-')))
+    ds_1t<-select(ds_1t,-c('ANNO','MES','DIA'))
+    ds_1t <- ds_1t %>% 
+    group_by(Fecha,MUNICIPIO,PROVINCIA,ESTACION) %>%
+    summarise(Valor=max(Valor,na.rm=TRUE))
+    new_name=strsplit(file,'_')[[1]][1]
+    ds_1t[new_name]<-ds_1t$Valor
+    ds_1t<-select(ds_1t,-c('Valor'))
+    df_t[[i]]<-ds_1t
+    names[[i]]<-new_name
+    i=i+1
+  }
+  names(df_t)<-names
+  valids_var<-c('NO2','NOx','O3','PM10','PM25','SO2')
+  df_t<-df_t[valids_var]
+  z<-merge(df_t[[1]],df_t[[2]],all=TRUE)
+  for (i in 3:length(df_t)){
+    z<-merge(z,df_t[[i]],all=TRUE)
+    
+  }
+  
+z_f[[n]]<-z
 
+}
 ```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# METADATOS
+
+# Para 2018
+meta_df <- read_excel("../data/2018/Metadatos/metainformacion_2018_tcm30-501408.xlsx", sheet="Estaciones evaluación 2018")
+meta_df<-meta_df[meta_df$N_RED=='CCAA Com. Valenciana',]
+z<-z_f[[1]]
+z_2018<-merge.data.frame(meta_df,z, by=c('PROVINCIA','MUNICIPIO','ESTACION'))
+columnas<-c('N_PROVINCIA','N_MUNICIPIO','LATITUD_G','LONGITUD_G','TIPO_AREA',colnames(z))
+z_2018<-z_2018 %>% select(all_of(columnas))
+z_2018<-select(z_2018,-c('PROVINCIA','MUNICIPIO'))
+
+# Para 2019
+meta_df <- read_excel("../data/2019/Metadatos/metainformacion_2019_tcm30-513561.xlsx", sheet="Estaciones evaluación 2019")
+meta_df<-meta_df[meta_df$N_RED=='CCAA Com. Valenciana',]
+z<-z_f[[2]]
+z_2019<-merge.data.frame(meta_df,z, by=c('PROVINCIA','MUNICIPIO','ESTACION'))
+columnas<-c('N_PROVINCIA','N_MUNICIPIO','LATITUD_G','LONGITUD_G','TIPO_AREA',colnames(z))
+z_2019<-z_2019 %>% select(all_of(columnas))
+z_2019<-select(z_2019,-c('PROVINCIA','MUNICIPIO'))
+
+# Para 2020
+meta_df <- read_excel("../data/2020/Metadatos/metainformacionestacionesymagnitudes2020_tcm30-531266.xlsx", 
+    sheet = "Estaciones")
+meta_df<-meta_df[meta_df$N_RED=='CCAA Com. Valenciana',]
+z<-z_f[[3]]
+z_2020<-merge.data.frame(meta_df,z, by=c('PROVINCIA','MUNICIPIO','ESTACION'))
+columnas<-c('N_PROVINCIA','N_MUNICIPIO','LATITUD_G','LONGITUD_G','TIPO_AREA',colnames(z))
+z_2020<-z_2020 %>% select(all_of(columnas))
+z_2020<-select(z_2020,-c('PROVINCIA','MUNICIPIO'))
+
+# Para 2021
+meta_df <- read_excel("../data/2021/Metadatos/metainformacion2021_tcm30-545563.xlsx", sheet="Estaciones")
+meta_df<-meta_df[meta_df$N_RED=='CCAA Com. Valenciana',]
+z<-z_f[[4]]
+z_2021<-merge.data.frame(meta_df,z, by=c('PROVINCIA','MUNICIPIO','ESTACION'))
+columnas<-c('N_PROVINCIA','N_MUNICIPIO','LATITUD_G','LONGITUD_G','TIPO_AREA',colnames(z))
+z_2021<-z_2021 %>% select(all_of(columnas))
+z_2021<-select(z_2021,-c('PROVINCIA','MUNICIPIO'))
+
+# Para 2022
+meta_df <- read_excel("../data/2022/Metadatos/Metainformacion2022.xlsx", sheet="Estaciones")
+meta_df<-meta_df[meta_df$N_RED=='CCAA Com. Valenciana',]
+z<-z_f[[5]]
+z_2022<-merge.data.frame(meta_df,z, by=c('PROVINCIA','MUNICIPIO','ESTACION'))
+columnas<-c('N_PROVINCIA','N_MUNICIPIO','LATITUD_G','LONGITUD_G','TIPO_AREA',colnames(z))
+z_2022<-z_2022 %>% select(all_of(columnas))
+z_2022<-select(z_2022,-c('PROVINCIA','MUNICIPIO'))
+```
+    
+```{r}
+z_final<-rbind(z_2018,z_2019,z_2020,z_2021,z_2022)
+#write.csv(z_final, "data/join_datas.csv")
+summary(z_final)
+```
+
 
 
 # Limpieza de datos
 
+Una vez adquirido un conjunto de datos organizado en formato tidy, es necesario llevar a cabo un proceso de limpieza. Este procedimiento implica la evaluación minuciosa de cada inconsistencia, tales como los valores faltantes (NAs) y los valores atípicos (outliers). Con el propósito de abordar estas discrepancias, se implementan diversos procedimientos y técnicas especializadas.
+
+## Outliers
+
+Como es ampliamente conocido, un "outlier" se define como un valor atípico en un conjunto de datos que exhibe una marcada disparidad con respecto al resto de las observaciones. Para analizar la presencia de tales observaciones atípicas, se emplean tres técnicas específicas: la regla de 3 sigma, la regla de Hampel, la regla de boxplot y la regla de los percentiles. Obtuvimos la siguiente tabla:
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+# Método 3-Sigma
+
+library(readr)
+df <- read_csv("../data/join_datas.csv") #Hemos guardado el csv con el formato tidy para cargarlo automáticamente y no tener que estas procesando todos los pasos anteriores
+
+find_outliers_3sigma <- function(x) {
+  x <- na.omit(x)
+  mean_val <- mean(x)
+  sd_val <- sd(x)
+  lower_bound <- mean_val - 3 * sd_val
+  upper_bound <- mean_val + 3 * sd_val
+  outliers <- x[x < lower_bound | x > upper_bound]
+  positions <- which(x %in% outliers)
+  return(list(values = outliers, positions = positions))
+}
+
+# Método IQR(Boxplot)
+
+find_outliers_iqr <- function(x) {
+  x <- na.omit(x)
+  q1 <- quantile(x, 0.25)
+  q3 <- quantile(x, 0.75)
+  iqr <- q3 - q1
+  lower_bound <- q1 - 1.5 * iqr
+  upper_bound <- q3 + 1.5 * iqr
+  outliers <- x[x < lower_bound | x > upper_bound]
+  positions <- which(x %in% outliers)
+  return(list(values = outliers, positions = positions))
+}
 
 
+# Método del Hampel
+find_outliers_hampel <- function(df_column, k = 3) {
+  x <- na.omit(df_column)
+  med <- median(x)
+  mad <- median(abs(x - med))
+  threshold <- k * 1.4826 * mad
+  outliers <- x[abs(x - med) > threshold]
+  positions <- which(df_column %in% outliers)
+  return(list(values = outliers, positions = positions))
+}
 
+# Método de los percentiles
+find_outliers_percentile <- function(x) {
+  x <- na.omit(x)
+  lower_bound <- quantile(x, 0.05)
+  upper_bound<- quantile(x, 0.95)
+  outliers <- x[x < lower_bound | x > upper_bound]
+  positions <- which(x %in% outliers)
+  return(list(values = outliers, positions = positions))
+}
+```
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# Aplicamos a nuestros datos los métodos anteriores
+
+columns_to_analyze <- c("NO2", "NOx", "O3", "PM10", "PM25", "SO2")
+
+outliers_3sigma_list <- lapply(df[columns_to_analyze], find_outliers_3sigma)
+outliers_hampel_list <- lapply(df[columns_to_analyze], find_outliers_hampel)
+outliers_iqr_list <- lapply(df[columns_to_analyze], find_outliers_iqr)
+outliers_percentile_list <- lapply(df[columns_to_analyze], find_outliers_percentile)
+
+#print("Outliers detectados usando la regla 3-sigma:")
+#print(outliers_3sigma_list)
+
+#print("Outliers detected using Hampel identifier:")
+#print(outliers_hampel_list)
+
+#print("Outliers detected using IQR(Boxplot):")
+#print(outliers_iqr_list)
+
+#print("Outliers detected using IQR:")
+#print(outliers_percentile_list)
+
+```
+
+
+```{r}
+library(tidyverse)
+
+outliers_summary_transformed <- outliers_summary %>%
+  pivot_wider(names_from = Method, values_from = Outliers_Count)
+
+print(outliers_summary_transformed)
+```
+
+
+## Imputación NAs
 
 
 

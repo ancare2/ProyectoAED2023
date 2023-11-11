@@ -268,7 +268,7 @@ library(dplyr)
 library(tidyr)
 library(readxl)
 library(lubridate)
-main_root<-'data'
+main_root<-'../data'
 carpetas<-c('2018','2019','2020','2021','2022')
 subcarpeta1<-'Datos_diarios'
 z_f<-list()
@@ -434,14 +434,15 @@ find_outliers_percentile <- function(x) {
 
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
+
 # Aplicamos a nuestros datos los métodos anteriores
 
-columns_to_analyze <- c("NO2", "NOx", "O3", "PM10", "PM25", "SO2")
+columnas_analizar <- c("NO2", "NOx", "O3", "PM10", "PM25", "SO2")
 
-outliers_3sigma_list <- lapply(df[columns_to_analyze], find_outliers_3sigma)
-outliers_hampel_list <- lapply(df[columns_to_analyze], find_outliers_hampel)
-outliers_iqr_list <- lapply(df[columns_to_analyze], find_outliers_iqr)
-outliers_percentile_list <- lapply(df[columns_to_analyze], find_outliers_percentile)
+outliers_3sigma_list <- lapply(df[columnas_analizar], find_outliers_3sigma)
+outliers_hampel_list <- lapply(df[columnas_analizar], find_outliers_hampel)
+outliers_iqr_list <- lapply(df[columnas_analizar], find_outliers_iqr)
+outliers_percentile_list <- lapply(df[columnas_analizar], find_outliers_percentile)
 
 #print("Outliers detectados usando la regla 3-sigma:")
 #print(outliers_3sigma_list)
@@ -467,8 +468,67 @@ outliers_summary_transformed <- outliers_summary %>%
 print(outliers_summary_transformed)
 ```
 
+En esta tabla visualizamos un recuento de la cantidad de outliers detectados con cada método. Ahora bien, tenemos que analizar que consideramos un valor atípico en nuestro caso. Para ello, debemos establecer algun criterio. Después de documentarnos, encontramos en el BOE (Boletín oficial del Estado) la siguiente tabla:
+
+
+| $S0_{2}$ | PM2,5 | PM10 | $O_{3}$ | $NO_{2}$ | CATEGORÍA DEL ÍNDICE |
+|--------|-------|------|-------|--------|----------------------|
+| 751-1250| 76-800| 151-1200| 381-800 | 341-1000 | Extremadamente Desfavorable|
+
+
+Para utilizar la detección de valores atípicos y asignarles esta categoría, en nuestro caso calculamos tanto el valor máximo como el mínimo para cada uno de los parámetros químicos. Este proceso nos permite evaluar si dichos valores caen fuera del rango establecido en la tabla anterior, lo que justificaría su clasificación como outliers. Tras realizar estos cálculos, hemos verificado que los valores identificados como outliers son válidos y, por ende, hemos decidido mantenerlos en el conjunto de datos.
+
+
+```{r, echo=FALSE}
+(max_values <- lapply(outliers_3sigma_list, function(x) max(x$values, na.rm = TRUE)))
+(min_values <- lapply(outliers_3sigma_list, function(x) min(x$values, na.rm = TRUE)))
+
+(max_values <- lapply(outliers_hampel_list, function(x) max(x$values, na.rm = TRUE)))
+(min_values <- lapply(outliers_hampel_list, function(x) min(x$values, na.rm = TRUE)))
+
+(max_values <- lapply(outliers_iqr_list, function(x) max(x$values, na.rm = TRUE)))
+(min_values <- lapply(outliers_iqr_list, function(x) min(x$values, na.rm = TRUE)))
+
+(max_values <- lapply(outliers_percentile_list, function(x) max(x$values, na.rm = TRUE)))
+(min_values <- lapply(outliers_percentile_list, function(x) min(x$values, na.rm = TRUE)))
+```
 
 ## Imputación NAs
+
+El siguiente paso en el proceso de limpieza de nuestro conjunto de datos implica la imputación de los valores faltantes, comúnmente conocidos como NAs. Para abordar esta tarea, hemos estudiado diversas técnicas en clase, entre las cuales se incluyen: la eliminación de datos, la imputación con un valor estimado basado en los valores conocidos, la imputación mediante un modelo predictivo y la imputación al valor más cercano utilizando el algoritmo KNN (k-vecinos más cercanos). Se recomienda preferentemente emplear alguna de las dos últimas opciones, reservando las opciones de eliminación de datos únicamente cuando no existan alternativas viables.
+
+Como consecuencia, inicialmente decidimos emprender el proceso de imputación mediante la aplicación de un método predictivo. Implementamos un modelo de regresión lineal específicamente para las variables NOx y NO2. No obstante, es importante señalar que el éxito de esta metodología fue limitado, logrando imputar únicamente tres datos.
+
+```{r, echo=FALSE}
+sample <- sample(c(TRUE, FALSE), nrow(df), replace=TRUE, prob=c(0.7,0.3))
+train  <- df[sample, ]
+test   <- df[!sample, ]
+
+lm.NO2<-lm(NO2~NOx,train)
+summary(lm.NO2)
+
+predict<-predict.lm(lm.NO2,test)
+RMSE<-sqrt(mean((test$NO2-predict) ^ 2, na.rm=T))
+SD_NO2<-sd(df$NO2,na.rm=T)
+
+hist(df$NO2)
+summary(df$NO2)
+```
+ 
+ 
+    
+```{r, echo=FALSE}
+df_imputed1<-df
+df_imputed1[is.na(df_imputed1$NO2),]$NO2<-predict.lm(lm.NO2,df_imputed1[is.na(df_imputed1$NO2),])
+hist(df_imputed1$NO2)
+summary(df_imputed1$NO2)
+```
+
+```
+
+
+
+
 
 
 

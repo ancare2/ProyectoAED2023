@@ -119,7 +119,29 @@ z_final<-rbind(z_2018,z_2019,z_2020,z_2021,z_2022)
 
 summary(z_final)
 ```
+```{r}
+df<-z_final
+#requiere sf
+library(sf)
+df<-mutate(df,TIPO_AREA=as.factor(TIPO_AREA))
+df <- st_as_sf(df, coords = c('LONGITUD_G','LATITUD_G'), crs = 4326)
+df<-st_transform(df,crs=32630)
+X_UTM30N<-c()
+Y_UTM30N<-c()
+for (i in 1:nrow(df)){
+  X_UTM30N<-c(X_UTM30N,st_bbox(df$geometry[i])[[1]])
+  Y_UTM30N<-c(Y_UTM30N,st_bbox(df$geometry[i])[[2]])
+}
+df$X_UTM30N<-X_UTM30N
+df$Y_UTM30N<-Y_UTM30N
 
+```
+
+# modelo lineal
+
+```{r}
+
+```
 
 
 

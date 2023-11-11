@@ -34,7 +34,7 @@ for (c in carpetas){
     ds_1t<-select(ds_1t,-c('ANNO','MES','DIA'))
     ds_1t <- ds_1t %>% 
     group_by(Fecha,MUNICIPIO,PROVINCIA,ESTACION) %>%
-    summarise(Valor=max(Valor))
+    summarise(Valor=max(Valor,na.rm=TRUE))
     new_name=strsplit(file,'_')[[1]][1]
     ds_1t[new_name]<-ds_1t$Valor
     ds_1t<-select(ds_1t,-c('Valor'))

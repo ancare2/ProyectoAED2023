@@ -79,25 +79,85 @@ find_outliers_percentile <- function(x) {
 ```{r}
 
 
-columns_to_analyze <- c("As", "BaP", "Cd", "Ni", "Pb", "PM2.5", "PM10")
+columns_to_analyze <- c("NO2", "NOx", "O3", "PM10", "PM25", "SO2")
 
 outliers_3sigma_list <- lapply(df[columns_to_analyze], find_outliers_3sigma)
 outliers_hampel_list <- lapply(df[columns_to_analyze], find_outliers_hampel)
 outliers_iqr_list <- lapply(df[columns_to_analyze], find_outliers_iqr)
 outliers_percentile_list <- lapply(df[columns_to_analyze], find_outliers_percentile)
 
-print("Outliers detectados usando la regla 3-sigma:")
+#print("Outliers detectados usando la regla 3-sigma:")
 #print(outliers_3sigma_list)
 
-print("Outliers detected using Hampel identifier:")
+#print("Outliers detected using Hampel identifier:")
 #print(outliers_hampel_list)
 
-print("Outliers detected using IQR(Boxplot):")
+#print("Outliers detected using IQR(Boxplot):")
 #print(outliers_iqr_list)
 
-print("Outliers detected using IQR:")
+#print("Outliers detected using IQR:")
 #print(outliers_percentile_list)
 
 ```
+
+# Tabla de outliers
+
+```{r}
+
+outliers_summary <- data.frame(Chemical_Element = rep(columns_to_analyze, each = 4),
+                                Method = rep(c("3-Sigma", "IQR", "Hampel", "Percentil"), times = length(columns_to_analyze)),
+                                Outliers_Count = c(
+                                  sapply(outliers_3sigma_list, function(x) length(x$values)),
+                                  sapply(outliers_iqr_list, function(x) length(x$values)),
+                                  sapply(outliers_hampel_list, function(x) length(x$values)),
+                                  sapply(outliers_percentile_list, function(x) length(x$values))
+                                ))
+
+print(outliers_summary)
+
+
+```
+
+# Tabla de outliers (otra forma) (necesita la ejecución del código del chunk anterior)
+
+```{r}
+
+
+library(tidyverse)
+
+outliers_summary_transformed <- outliers_summary %>%
+  pivot_wider(names_from = Method, values_from = Outliers_Count)
+
+print(outliers_summary_transformed)
+
+
+```
+
+```{r}
+library(VIM)
+
+#df2 <- kNN(df, variable = c("NO2"), dist_var = c("LONGITUD_G", "LATITUD_G", "Fecha"), k = 1)
+
+#file_path <- 'data/pruebas_imp.csv'
+
+#write.csv(df2, file = file_path)
+
+library(readr)
+df2 <- read_csv("data/pruebas_imp.csv")
+
+hist(df$NO2)
+
+```
+
+
+
+```{r}
+hist(df2$NO2)
+```
+
+
+
+
+
 
 

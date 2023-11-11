@@ -5,19 +5,22 @@ date: "`r Sys.Date()`"
 output: html_document
 ---
 
-```{r}
+
+```{r message=FALSE, warning=FALSE}
 library(readr)
 library(dplyr)
 library(tidyr)
 library(readxl)
+library(lubridate)
 main_root<-'data'
-carpetas<-c('2019','2020','2021','2022')
+carpetas<-c('2018','2019','2020','2021','2022')
 subcarpeta1<-'Datos_diarios'
 z_f<-list()
-n=1
+n=0
 for (c in carpetas){
   files<-dir(paste(main_root,c,subcarpeta1,sep='/'))
   df_t<-list()
+  names<-list()
   n=n+1
   i=1
   for (file in files){
@@ -31,114 +34,92 @@ for (c in carpetas){
     ds_1t<-select(ds_1t,-c('ANNO','MES','DIA'))
     ds_1t <- ds_1t %>% 
     group_by(Fecha,MUNICIPIO,PROVINCIA,ESTACION) %>%
-    summarise(Valor=mean(Valor))
+    summarise(Valor=max(Valor))
     new_name=strsplit(file,'_')[[1]][1]
     ds_1t[new_name]<-ds_1t$Valor
     ds_1t<-select(ds_1t,-c('Valor'))
     df_t[[i]]<-ds_1t
+    names[[i]]<-new_name
     i=i+1
   }
-  
-  z<-merge(df_t[1],df_t[2],all=TRUE)
+  names(df_t)<-names
+  valids_var<-c('NO2','NOx','O3','PM10','PM25','SO2')
+  df_t<-df_t[valids_var]
+  z<-merge(df_t[[1]],df_t[[2]],all=TRUE)
   for (i in 3:length(df_t)){
-    z<-merge(z,df_t[i],all=TRUE)
-  }     
+    z<-merge(z,df_t[[i]],all=TRUE)
+    
+  }
+  
 z_f[[n]]<-z
+
 }
 
-
 ```
 
+El ICA define 6 categorías de calidad del aire: buena, razonablemente buena, regular, desfavorable, muy desfavorable, y extremadamente desfavorable. A cada estación se le asigna la peor categoría en términos de calidad del aire de cualquiera de los contaminantes que se tienen en consideración para su estimación, . Los contaminantes que se consideran en el índice son: Partículas en suspensión (PM10), Partículas en suspensión (PM2,5), Ozono troposférico (O3), Dióxido de nitrógeno (NO2) y Dióxido de azufre (SO2)
 
-Cada elemento de la lista es un dataframe, el elemento 1 es del 2019 y asi hasta 2022.
 
-
-    
-# Para 2019
+Cada elemento de la lista es un dataframe, el elemento 1 es del 2018 y asi hasta 2022.
 
 
 ```{r}
 
+# Para 2018
+meta_df <- read_excel("./data/2018/Metadatos/metainformacion_2018_tcm30-501408.xlsx", sheet="Estaciones evaluación 2018")
+meta_df<-meta_df[meta_df$N_RED=='CCAA Com. Valenciana',]
+z<-z_f[[1]]
+z_2018<-merge.data.frame(meta_df,z, by=c('PROVINCIA','MUNICIPIO','ESTACION'))
+columnas<-c('N_PROVINCIA','N_MUNICIPIO','LATITUD_G','LONGITUD_G','TIPO_AREA',colnames(z))
+z_2018<-z_2018 %>% select(all_of(columnas))
+z_2018<-select(z_2018,-c('PROVINCIA','MUNICIPIO'))
+
+# Para 2019
 meta_df <- read_excel("./data/2019/Metadatos/metainformacion_2019_tcm30-513561.xlsx", sheet="Estaciones evaluación 2019")
 meta_df<-meta_df[meta_df$N_RED=='CCAA Com. Valenciana',]
-
-
-```
-
-
-```{r}
-
-z<-z_f[1]
+z<-z_f[[2]]
 z_2019<-merge.data.frame(meta_df,z, by=c('PROVINCIA','MUNICIPIO','ESTACION'))
-columnas<-c(colnames(z),'LATITUD_G','LONGITUD_G','ZONA')
-z_2019<-z_2019[,columnas]
-#view(z_2019)
-```
-    
+columnas<-c('N_PROVINCIA','N_MUNICIPIO','LATITUD_G','LONGITUD_G','TIPO_AREA',colnames(z))
+z_2019<-z_2019 %>% select(all_of(columnas))
+z_2019<-select(z_2019,-c('PROVINCIA','MUNICIPIO'))
 
 # Para 2020
-
-
-```{r}
-
 meta_df <- read_excel("./data/2020/Metadatos/metainformacionestacionesymagnitudes2020_tcm30-531266.xlsx", 
     sheet = "Estaciones")
 meta_df<-meta_df[meta_df$N_RED=='CCAA Com. Valenciana',]
-```
+z<-z_f[[3]]
+z_2020<-merge.data.frame(meta_df,z, by=c('PROVINCIA','MUNICIPIO','ESTACION'))
+columnas<-c('N_PROVINCIA','N_MUNICIPIO','LATITUD_G','LONGITUD_G','TIPO_AREA',colnames(z))
+z_2020<-z_2020 %>% select(all_of(columnas))
+z_2020<-select(z_2020,-c('PROVINCIA','MUNICIPIO'))
 
-
-```{r}
-
-z<-z_f[2]
-z_2020<-merge(meta_df,z, by=c('PROVINCIA','MUNICIPIO','ESTACION'))
-columnas<-c(colnames(z),'LATITUD_G','LONGITUD_G','ZONA')
-z_2020<-z_2020[,columnas]
-#view(z_2020)
-```
-    
 # Para 2021
-
-```{r}
-
 meta_df <- read_excel("./data/2021/Metadatos/metainformacion2021_tcm30-545563.xlsx", sheet="Estaciones")
 meta_df<-meta_df[meta_df$N_RED=='CCAA Com. Valenciana',]
-```
+z<-z_f[[4]]
+z_2021<-merge.data.frame(meta_df,z, by=c('PROVINCIA','MUNICIPIO','ESTACION'))
+columnas<-c('N_PROVINCIA','N_MUNICIPIO','LATITUD_G','LONGITUD_G','TIPO_AREA',colnames(z))
+z_2021<-z_2021 %>% select(all_of(columnas))
+z_2021<-select(z_2021,-c('PROVINCIA','MUNICIPIO'))
 
-
-```{r}
-
-z<-z_f[3]
-z_2021<-merge(meta_df,z, by=c('PROVINCIA','MUNICIPIO','ESTACION'))
-columnas<-c(colnames(z),'LATITUD_G','LONGITUD_G','ZONA')
-z_2021<-z_2021[,columnas]
-#view(z_2021)
-```
-    
 # Para 2022
-
-```{r}
-
 meta_df <- read_excel("./data/2022/Metadatos/Metainformacion2022.xlsx", sheet="Estaciones")
 meta_df<-meta_df[meta_df$N_RED=='CCAA Com. Valenciana',]
-unique(meta_df$PROVINCIA)
+z<-z_f[[5]]
+z_2022<-merge.data.frame(meta_df,z, by=c('PROVINCIA','MUNICIPIO','ESTACION'))
+columnas<-c('N_PROVINCIA','N_MUNICIPIO','LATITUD_G','LONGITUD_G','TIPO_AREA',colnames(z))
+z_2022<-z_2022 %>% select(all_of(columnas))
+z_2022<-select(z_2022,-c('PROVINCIA','MUNICIPIO'))
 ```
-
-
-```{r}
-
-z<-z_f[4]
-z_2022<-merge(meta_df,z, by=c('PROVINCIA','MUNICIPIO','ESTACION'))
-columnas<-c(colnames(z),'LATITUD_G','LONGITUD_G','ZONA')
-z_2022<-z_2022[,columnas]
-#view(z_2022)
-```
-
-
     
+
 ```{r}
 z_final<-rbind(z_2018,z_2019,z_2020,z_2021,z_2022)
 #write.csv(z_final, "data/join_datas.csv")
+
+summary(z_final)
 ```
+
 
 
 

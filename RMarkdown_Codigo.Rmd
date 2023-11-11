@@ -139,9 +139,35 @@ df$Y_UTM30N<-Y_UTM30N
 
 # modelo lineal
 
+
 ```{r}
+sample <- sample(c(TRUE, FALSE), nrow(df), replace=TRUE, prob=c(0.7,0.3))
+train  <- df[sample, ]
+test   <- df[!sample, ]
+
+lm.NO2<-lm(NO2~NOx,train)
+summary(lm.NO2)
+
+predict<-predict.lm(lm.NO2,test)
+RMSE<-sqrt(mean((test$NO2-predict) ^ 2, na.rm=T))
+SD_NO2<-sd(df$NO2,na.rm=T)
+
+hist(df$NO2)
+summary(df$NO2)
+
+
 
 ```
+ 
+ 
+    
+```{r}
+df_imputed1<-df
+df_imputed1[is.na(df_imputed1$NO2),]$NO2<-predict.lm(lm.NO2,df_imputed1[is.na(df_imputed1$NO2),])
+hist(df_imputed1$NO2)
+summary(df_imputed1$NO2)
+```
+
 
 
 

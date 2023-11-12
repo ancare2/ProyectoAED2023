@@ -538,8 +538,12 @@ summary(df_imputed1$NO2)
 
 # Análisis Univariante
 
+
+En esta sección, procederemos a llevar a cabo un análisis univariante sobre el conjunto de datos previamente procesado. El propósito principal de esta evaluación consiste en examinar individualmente cada variable presente en el dataset, con el objetivo de obtener un panorama detallado de su distribución y variabilidad.
+
+En primer lugar, para tener una visión global de este dataset sacamos un resumen estadístico
+
 ```{r}
-library(ggplot2)
 library(dplyr)
 library(readr)
 
@@ -549,16 +553,17 @@ data <- read_csv("../data/imputed_datas.csv")
 ```{r}
 # Resumen estadístico
 summary(data)
-head(data) 
-colnames(data)
+
 ```
 
+
+Una vez obtenidos los estadísticos. Visualizamos nuestras variables.
 
 
 ```{r, echo=FALSE}
 library(ggplot2)
 library(grid)
-# Define una función para crear las gráficas
+
 create_histogram <- function(data, contaminante, x_label) {
   ggplot(data, aes(x = get(paste0(contaminante, ".num")))) +
     geom_histogram(binwidth = 5, fill = "blue", color = "black", alpha = 0.7) +
@@ -566,25 +571,21 @@ create_histogram <- function(data, contaminante, x_label) {
     theme_minimal()
 }
 
-# Crea una lista de gráficas
 graficas <- lapply(c("NO2", "O3", "PM10", "PM25", "SO2"), function(contaminante) {
   create_histogram(data, contaminante, paste("Concentración de", contaminante))
 })
 
-# Combina las gráficas en una única representación
+# Combinamos las gráficas en una única representación
 multiplot <- function(..., plotlist = NULL, cols = 1, layout = NULL) {
   require(grid)
 
-  # Make a list from the ... arguments and plotlist
+  
   plots <- c(list(...), plotlist)
 
   numPlots = length(plots)
 
-  # If layout is NULL, then use 'cols' to determine layout
+  
   if (is.null(layout)) {
-    # Make the panel
-    # ncol: Number of columns of plots
-    # nrow: Number of rows needed, calculated from # of cols
     layout <- matrix(seq(1, cols * ceiling(numPlots/cols)),
                      ncol = cols, nrow = ceiling(numPlots/cols))
   }
@@ -593,13 +594,12 @@ multiplot <- function(..., plotlist = NULL, cols = 1, layout = NULL) {
     print(plots[[1]])
 
   } else {
-    # Set up the page
+    
     grid.newpage()
     pushViewport(viewport(layout = grid.layout(nrow(layout), ncol(layout))))
 
-    # Make each plot, in the correct location
     for (i in 1:numPlots) {
-      # Get the i,j matrix positions of the regions that contain this subplot
+      
       matchidx <- as.data.frame(which(layout == i, arr.ind = TRUE))
 
       print(plots[[i]], vp = viewport(layout.pos.row = matchidx$row,
@@ -608,30 +608,224 @@ multiplot <- function(..., plotlist = NULL, cols = 1, layout = NULL) {
   }
 }
 
-# Muestra las gráficas combinadas
 multiplot(plotlist = graficas, cols = 2)
+
+```
+
+La representación gráfica previa proporciona una visión general de la concentración de cada elemento en nuestro conjunto de datos. La representación más notable en términos de su estructura y forma corresponde al elemento $O_{3}$, ya que parece seguir una distribución gaussiana. Los datos están distribuidos de manera uniforme a lo largo del eje x, que representa la concentración, y muestran una distribución alrededor de la media y la mediana, ambas con valores muy similares, como se confirmó en los estadísticos previamente descritos. (88.60 y 88.00 respectivamente).
+
+En contraste, las representaciones de los otros elementos exhiben una asimetría significativa, con valores relativamente altos al principio seguidos de una disminución. Estas observaciones son respaldadas numéricamente por los estadísticos calculados anteriormente. Por ejemplo, al considerar el elemento $S0_{2}$, se observa un valor máximo de 239,000. Sin embargo, la media calculada es de 6,359, un valor considerablemente distante del máximo mencionado. Además, el valor mínimo es 1, mientras que la mediana es 4,000. Estas discrepancias justifican la representación gráfica de esta información. Esto mismo sucedería con los elementos restantes.
+
+
+A continuación, procederemos a visualizar la evolución de los compuestos químicos a lo largo del tiempo, con el objetivo de realizar un análisis más exhaustivo sobre la calidad del aire.
+
+
+```{r}
+library(ggplot2)
+
+# Crear gráficos de densidad
+ggplot(data, aes(x = NO2.num, fill = "NO2")) +
+  geom_density(alpha = 0.5) +
+  labs(title = "Densidad de NO2", x = "Concentración de NO2")
+
+ggplot(data, aes(x = O3.num, fill = "O3")) +
+  geom_density(alpha = 0.5) +
+  labs(title = "Densidad de O3", x = "Concentración de O3")
+
+ggplot(data, aes(x = PM10.num, fill = "PM10")) +
+  geom_density(alpha = 0.5) +
+  labs(title = "Densidad de PM10", x = "Concentración de PM10")
+
+ggplot(data, aes(x = PM25.num, fill = "PM2.5")) +
+  geom_density(alpha = 0.5) +
+  labs(title = "Densidad de PM2.5", x = "Concentración de PM2.5")
+
+ggplot(data, aes(x = SO2.num, fill = "SO2")) +
+  geom_density(alpha = 0.5) +
+  labs(title = "Densidad de SO2", x = "Concentración de SO2")
+
+ggplot(data, aes(x = Dias)) +
+  geom_density(alpha = 0.5) +
+  labs(title = "Densidad de Días", x = "Número de Días")
+
+```
+```{r}
+library(tidyverse)
+library(ggplot2)
+
+# Aplicar la estandarización min-max a los datos por año
+data_scaled <- data %>%
+  group_by(year = lubridate::year(Fecha)) %>%
+  mutate(
+    NO2_scaled = (NO2.num - min(NO2.num)) / (max(NO2.num) - min(NO2.num)),
+    O3_scaled = (O3.num - min(O3.num)) / (max(O3.num) - min(O3.num)),
+    PM10_scaled = (PM10.num - min(PM10.num)) / (max(PM10.num) - min(PM10.num)),
+    PM25_scaled = (PM25.num - min(PM25.num)) / (max(PM25.num) - min(PM25.num)),
+    SO2_scaled = (SO2.num - min(SO2.num)) / (max(SO2.num) - min(SO2.num))
+  )
+
+# Crear un gráfico de líneas superpuestas con datos escalados y facet_wrap por año
+ggplot(data_scaled, aes(x = Fecha, color = "Compuesto")) +
+  geom_line(aes(y = NO2_scaled, color = "NO2")) +
+  geom_line(aes(y = O3_scaled, color = "O3")) +
+  geom_line(aes(y = PM10_scaled, color = "PM10")) +
+  geom_line(aes(y = PM25_scaled, color = "PM25")) +
+  geom_line(aes(y = SO2_scaled, color = "SO2")) +
+  labs(title = "Concentración de Compuestos Químicos a lo largo del tiempo (Escala min-max)",
+       x = "Años",
+       y = "Concentración") +
+  scale_color_manual(values = c("NO2" = "red", "O3" = "blue", "PM10" = "green", "PM25" = "purple", "SO2" = "orange")) +
+  theme_minimal() +
+  facet_wrap(~year, scales = "free_y", ncol = 4)
+
+
+
+```
+```{r}
+library(tidyverse)
+library(ggplot2)
+
+# Convertir Fecha a formato de fecha
+data$Fecha <- as.Date(data$Fecha)
+
+# Aplicar la estandarización min-max a los datos por año
+data_scaled <- data %>%
+  group_by(year = lubridate::year(Fecha)) %>%
+  mutate(
+    NO2_scaled = (NO2.num - min(NO2.num)) / (max(NO2.num) - min(NO2.num)),
+    O3_scaled = (O3.num - min(O3.num)) / (max(O3.num) - min(O3.num)),
+    PM10_scaled = (PM10.num - min(PM10.num)) / (max(PM10.num) - min(PM10.num)),
+    PM25_scaled = (PM25.num - min(PM25.num)) / (max(PM25.num) - min(PM25.num)),
+    SO2_scaled = (SO2.num - min(SO2.num)) / (max(SO2.num) - min(SO2.num))
+  )
+
+# Crear un gráfico de líneas superpuestas con datos escalados, facet_wrap por año y suavizado por media mensual
+ggplot(data_scaled, aes(x = Fecha, color = "Compuesto")) +
+  geom_line(aes(y = NO2_scaled, color = "NO2")) +
+  geom_line(aes(y = O3_scaled, color = "O3")) +
+  geom_line(aes(y = PM10_scaled, color = "PM10")) +
+  geom_line(aes(y = PM25_scaled, color = "PM25")) +
+  geom_line(aes(y = SO2_scaled, color = "SO2")) +
+  geom_smooth(aes(y = NO2_scaled), method = "loess", se = FALSE, color = "red") +
+  geom_smooth(aes(y = O3_scaled), method = "loess", se = FALSE, color = "blue") +
+  geom_smooth(aes(y = PM10_scaled), method = "loess", se = FALSE, color = "green") +
+  geom_smooth(aes(y = PM25_scaled), method = "loess", se = FALSE, color = "purple") +
+  geom_smooth(aes(y = SO2_scaled), method = "loess", se = FALSE, color = "orange") +
+  labs(title = "Concentración de Compuestos Químicos a lo largo del tiempo (Escala min-max)",
+       x = "Años",
+       y = "Concentración") +
+  scale_color_manual(values = c("NO2" = "red", "O3" = "blue", "PM10" = "green", "PM25" = "purple", "SO2" = "orange")) +
+  theme_minimal() +
+  facet_wrap(~year, scales = "free_y", ncol = 4)
+
+```
+```{r}
+library(tidyverse)
+library(ggplot2)
+
+# Aplicar la estandarización min-max a los datos por año
+data_scaled <- data %>%
+  group_by(year = lubridate::year(Fecha)) %>%
+  mutate(
+    NO2_scaled = (NO2.num - min(NO2.num)) / (max(NO2.num) - min(NO2.num)),
+    O3_scaled = (O3.num - min(O3.num)) / (max(O3.num) - min(O3.num)),
+    PM10_scaled = (PM10.num - min(PM10.num)) / (max(PM10.num) - min(PM10.num)),
+    PM25_scaled = (PM25.num - min(PM25.num)) / (max(PM25.num) - min(PM25.num)),
+    SO2_scaled = (SO2.num - min(SO2.num)) / (max(SO2.num) - min(SO2.num))
+  )
+
+# Crear un gráfico de puntos superpuestos con datos escalados y facet_wrap por año
+ggplot(data_scaled, aes(x = Fecha, color = "Compuesto")) +
+  geom_line(aes(y = NO2_scaled, color = "NO2"), size = 2, alpha = 0.7) +
+  geom_line(aes(y = O3_scaled, color = "O3"), size = 2, alpha = 0.7) +
+  geom_line(aes(y = PM10_scaled, color = "PM10"), size = 2, alpha = 0.7) +
+  geom_line(aes(y = PM25_scaled, color = "PM25"), size = 2, alpha = 0.7) +
+  geom_line(aes(y = SO2_scaled, color = "SO2"), size = 2, alpha = 0.7) +
+  labs(title = "Concentración de Compuestos Químicos a lo largo del tiempo (Escala min-max)",
+       x = "Años",
+       y = "Concentración") +
+  scale_color_manual(values = c("NO2" = "red", "O3" = "blue", "PM10" = "green", "PM25" = "purple", "SO2" = "orange")) +
+  theme_minimal() +
+  facet_wrap(~year, scales = "free_y", ncol = 4)
+
+```
+
+```{r}
+library(tidyverse)
+library(ggplot2)
+
+# Convertir Fecha a formato de fecha
+data$Fecha <- as.Date(data$Fecha)
+
+# Aplicar la estandarización min-max a los datos por año
+data_scaled <- data %>%
+  mutate(
+    NO2_scaled = (NO2.num - min(NO2.num)) / (max(NO2.num) - min(NO2.num)),
+    O3_scaled = (O3.num - min(O3.num)) / (max(O3.num) - min(O3.num)),
+    PM10_scaled = (PM10.num - min(PM10.num)) / (max(PM10.num) - min(PM10.num)),
+    PM25_scaled = (PM25.num - min(PM25.num)) / (max(PM25.num) - min(PM25.num)),
+    SO2_scaled = (SO2.num - min(SO2.num)) / (max(SO2.num) - min(SO2.num))
+  )
+
+# Crear un gráfico de líneas superpuestas con datos escalados y suavizado por media mensual
+ggplot(data_scaled, aes(x = Fecha, color = "Compuesto")) +
+  geom_line(aes(y = NO2_scaled), alpha = 0.5, size = 1) +
+  geom_line(aes(y = O3_scaled), alpha = 0.5, size = 1) +
+  geom_line(aes(y = PM10_scaled), alpha = 0.5, size = 1) +
+  geom_line(aes(y = PM25_scaled), alpha = 0.5, size = 1) +
+  geom_line(aes(y = SO2_scaled), alpha = 0.5, size = 1) +
+  geom_smooth(aes(y = NO2_scaled), method = "loess", se = FALSE, color = "red") +
+  geom_smooth(aes(y = O3_scaled), method = "loess", se = FALSE, color = "blue") +
+  geom_smooth(aes(y = PM10_scaled), method = "loess", se = FALSE, color = "green") +
+  geom_smooth(aes(y = PM25_scaled), method = "loess", se = FALSE, color = "purple") +
+  geom_smooth(aes(y = SO2_scaled), method = "loess", se = FALSE, color = "orange") +
+  labs(title = "Concentración de Compuestos Químicos a lo largo del tiempo (Escala min-max)",
+       x = "Fecha",
+       y = "Concentración") +
+  scale_color_manual(values = c("NO2" = "red", "O3" = "blue", "PM10" = "green", "PM25" = "purple", "SO2" = "orange")) +
+  theme_minimal()
+
+
+```
+
+```{r}
+library(tidyverse)
+library(ggplot2)
+
+# Cargar tus datos
+# Por ejemplo, asumiendo que tus datos se llaman "data"
+# data <- read.csv("tu_archivo.csv")
+
+# Crear un gráfico de densidad superpuestas
+ggplot(data, aes(x = NO2.num, fill = "NO2")) +
+  geom_density(alpha = 0.5) +
+  geom_density(aes(x = O3.num, fill = "O3"), alpha = 0.5) +
+  geom_density(aes(x = PM10.num, fill = "PM10"), alpha = 0.5) +
+  geom_density(aes(x = PM25.num, fill = "PM25"), alpha = 0.5) +
+  geom_density(aes(x = SO2.num, fill = "SO2"), alpha = 0.5) +
+  labs(title = "Densidad de Compuestos Químicos",
+       x = "Concentración",
+       y = "Densidad") +
+  scale_fill_manual(values = c("NO2" = "red", "O3" = "blue", "PM10" = "green", "PM25" = "purple", "SO2" = "orange")) +
+  theme_minimal()
 
 ```
 
 
 ```{r}
-# # Instalar y cargar las librerías
-# library(sf)
-# library(leaflet)
-# 
-# # Cargar datos desde el archivo JSON
-# ruta_al_archivo <- "../data/CV-MAP.json"
-# datos_sf <- st_read(ruta_al_archivo)
-# 
-# # Crear un mapa interactivo con Leaflet
-# mapa <- leaflet() %>%
-#   addTiles() %>%
-#   addMarkers(data = datos_sf, ~X_UTM30N, ~Y_UTM30N, popup = ~as.character(geometry))
-# 
-# # Mostrar el mapa
-# mapa
+# Tendencia temporal de NO2.num
+ggplot(data, aes(x =Fecha, y = NO2.num)) +
+  geom_line() +
+  labs(title = "Tendencia Temporal de NO2.num", x = "Fecha", y = "Valor")
 
 ```
+
+
+
+
+
+
+
 
 Pensar que hacer con los nombres
 
@@ -671,8 +865,6 @@ ggplot(data, aes(x = N_PROVINCIA, fill = variable)) +
 ```
 
 
-
-
 ```{r warning=TRUE}
 library(zoo)
 data$Fecha <- as.Date(data$Fecha)
@@ -681,12 +873,6 @@ data$Fecha <- as.Date(data$Fecha)
 ```
 
 
-```{r}
-library(sf)
-library(ggmap)
-
-
-```
 
 
 
@@ -700,10 +886,119 @@ library(ggmap)
 
 # Análisis Bivariante
 
+## NO2
+
+
+```{r}
+# Gráfico de dispersión entre NO2.num y O3.num
+ggplot(data, aes(x = NO2.num, y = O3.num)) +
+  geom_point(color = "blue") +
+  labs(title = "Scatter Plot entre NO2.num y O3.num", x = "NO2.num", y = "O3.num")
+
+```
+
+```{r}
+# Matriz de correlación
+cor(data[, c("NO2.num", "O3.num", "PM10.num", "PM25.num", "SO2.num")])
+
+```
+
+
+
+```{r}
+# Gráfico de barras agrupadas para la variable TIPO_AREA y NO2.num
+ggplot(data, aes(x = TIPO_AREA, y = NO2.num, fill = TIPO_AREA)) +
+  geom_bar(stat = "summary", fun = "mean", position = "dodge") +
+  labs(title = "Promedio de NO2.num por TIPO_AREA", x = "TIPO_AREA", y = "Promedio NO2.num")
+
+```
+
+
+```{r}
+# Mapa de calor de la matriz de correlación
+cor_matrix <- cor(data[, c("NO2.num", "O3.num", "PM10.num", "PM25.num", "SO2.num")])
+heatmap(cor_matrix, col = colorRampPalette(c("blue", "white", "red"))(50), 
+        main = "Mapa de Calor de Correlación")
+
+```
+
+
+
+```{r}
+# Gráfico de líneas para NO2.num y O3.num a lo largo del tiempo
+ggplot(data, aes(x = Fecha)) +
+  geom_line(aes(y = NO2.num, color = "NO2")) +
+  geom_line(aes(y = O3.num, color = "O3")) +
+  labs(title = "Evolución de NO2.num y O3.num a lo largo del tiempo", x = "Fecha", y = "Concentración") +
+  scale_color_manual(values = c("NO2" = "red", "O3" = "blue"))
+
+```
+
+
+
+```{r}
+# Boxplot para comparar la distribución de NO2.num en diferentes estaciones
+ggplot(data, aes(x = year, y = NO2.num, fill = ESTACION)) +
+  geom_boxplot() +
+  labs(title = "Distribución de NO2.num por Estación", x = "Estación", y = "NO2.num")
+
+```
+
+```{r}
+# Matriz de gráficos de dispersión para varias variables
+pairs(~NO2.num + O3.num + PM10.num + PM25.num + SO2.num, data = data)
+
+```
 
 
 
 
+```{r}
+# Cargar datos geoespaciales de países (usaremos 'world' en lugar de 'ne_countries')
+world <- ne_download(scale = 110, returnclass = "sf")
+
+# Crear un objeto sf con las coordenadas de tu conjunto de datos
+data_sf <- st_as_sf(data, coords = c("X_UTM30N", "Y_UTM30N"), crs = st_crs(world))
+
+# Crear el mapa
+ggplot() +
+  geom_sf(data = world) +
+  geom_sf(data = data_sf, color = "red", size = 2) +
+  labs(title = "Ubicación de las coordenadas en España") +
+  theme_minimal()
+
+
+
+
+
+
+
+
+```
+
+
+
+
+
+
+```{r}
+# # Instalar y cargar las librerías
+# library(sf)
+# library(leaflet)
+# 
+# # Cargar datos desde el archivo JSON
+# ruta_al_archivo <- "../data/CV-MAP.json"
+# datos_sf <- st_read(ruta_al_archivo)
+# 
+# # Crear un mapa interactivo con Leaflet
+# mapa <- leaflet() %>%
+#   addTiles() %>%
+#   addMarkers(data = datos_sf, ~X_UTM30N, ~Y_UTM30N, popup = ~as.character(geometry))
+# 
+# # Mostrar el mapa
+# mapa
+
+```
 
 # Conclusiones
 

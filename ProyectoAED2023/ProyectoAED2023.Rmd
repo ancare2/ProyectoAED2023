@@ -459,6 +459,25 @@ outliers_percentile_list <- lapply(df[columnas_analizar], find_outliers_percenti
 ```
 
 
+Aquí utilizamos los códigos implementados anteriormente en cada una de las variables numéricas para detectar los outliers
+
+```{r}
+
+outliers_summary <- data.frame(Chemical_Element = rep(columns_to_analyze, each = 4),
+                                Method = rep(c("3-Sigma", "IQR", "Hampel", "Percentil"), times = length(columns_to_analyze)),
+                                Outliers_Count = c(
+                                  sapply(outliers_3sigma_list, function(x) length(x$values)),
+                                  sapply(outliers_iqr_list, function(x) length(x$values)),
+                                  sapply(outliers_hampel_list, function(x) length(x$values)),
+                                  sapply(outliers_percentile_list, function(x) length(x$values))
+                                ))
+
+print(outliers_summary)
+
+```
+
+
+
 ```{r}
 library(tidyverse)
 
@@ -523,14 +542,6 @@ df_imputed1[is.na(df_imputed1$NO2),]$NO2<-predict.lm(lm.NO2,df_imputed1[is.na(df
 hist(df_imputed1$NO2)
 summary(df_imputed1$NO2)
 ```
-
-
-
-
-
-
-
-
 
 
 
@@ -649,6 +660,8 @@ ggplot(data, aes(x = Dias)) +
   labs(title = "Densidad de Días", x = "Número de Días")
 
 ```
+
+
 ```{r}
 library(tidyverse)
 library(ggplot2)
@@ -681,6 +694,8 @@ ggplot(data_scaled, aes(x = Fecha, color = "Compuesto")) +
 
 
 ```
+
+
 ```{r}
 library(tidyverse)
 library(ggplot2)
@@ -719,6 +734,8 @@ ggplot(data_scaled, aes(x = Fecha, color = "Compuesto")) +
   facet_wrap(~year, scales = "free_y", ncol = 4)
 
 ```
+
+
 ```{r}
 library(tidyverse)
 library(ggplot2)
@@ -825,8 +842,6 @@ ggplot(data, aes(x =Fecha, y = NO2.num)) +
 
 
 
-
-
 Pensar que hacer con los nombres
 
 ```{r}
@@ -886,8 +901,62 @@ data$Fecha <- as.Date(data$Fecha)
 
 # Análisis Bivariante
 
-## NO2
+Para realizar el análisis bivariante primer observaremos como se relacionan todas las variables entre sí
 
+Primero vamos a realizar un `ggpairs` y un `ggcorr`para relacionar todos los elementos químicos con 
+todos (valores numéricos)
+
+```{r}
+
+library(GGally)
+num_cols <- c("NO2.num", "O3.num", "PM10.num", "PM25.num", "SO2.num")
+ggpairs(df[num_cols])
+```
+
+ 
+
+```{r}
+ggcorr(df[num_cols])
+```
+Como podemos ver, la relación de las variables no es clara. De forma general podemos decir que las variables
+son bastante independientes entre sí.Como excepción podríamos hablar de las variables PM10 y PM25
+
+```{r}
+Cov_Mat <- cov(df[num_cols])
+
+print("Matriz de covarianza")
+print(Cov_Mat)
+
+```
+
+
+```{r}
+Cor_Mat_S <- cor(df[num_cols], method = "spearman")
+Cor_Mat_P <- cor(df[num_cols], method = "pearson")
+
+print("Matriz de correlacion (Spearman)")
+print(Cor_Mat_S)
+print("Matriz de correlacion (Pearson)")
+print(Cor_Mat_P)
+
+```
+
+Ya que hemos visto que las variables PM10 y PM25, vamos a relacionar sus variables categóricas pra ver la relación.
+
+
+```{r}
+
+chisq.test(df$PM10.cat, df$PM25.cat, correct = F)
+
+```
+
+Podemos ver que el p-valor es muy pequeño, luego podemos rechazar la hipótesis de que no están relacionadas.
+Este efecto es más grande en las categóricas, ya que "medimos" por intervalos
+
+
+
+
+## NO2
 
 ```{r}
 # Gráfico de dispersión entre NO2.num y O3.num
@@ -902,7 +971,6 @@ ggplot(data, aes(x = NO2.num, y = O3.num)) +
 cor(data[, c("NO2.num", "O3.num", "PM10.num", "PM25.num", "SO2.num")])
 
 ```
-
 
 
 ```{r}

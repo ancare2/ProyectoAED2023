@@ -119,8 +119,13 @@ z_final<-rbind(z_2018,z_2019,z_2020,z_2021,z_2022)
 
 summary(z_final)
 ```
+
+
+
 ```{r}
-df<-z_final
+
+
+#df<-z_final
 #requiere sf
 library(sf)
 df<-mutate(df,TIPO_AREA=as.factor(TIPO_AREA))
@@ -166,6 +171,150 @@ df_imputed1<-df
 df_imputed1[is.na(df_imputed1$NO2),]$NO2<-predict.lm(lm.NO2,df_imputed1[is.na(df_imputed1$NO2),])
 hist(df_imputed1$NO2)
 summary(df_imputed1$NO2)
+```
+
+
+# Intento de imputación con kNN
+```{r}
+df <- read.csv("data/join_datas.csv")
+```
+
+```{r}
+library(VIM)
+df2 <- subset(df, select = -NOx )
+```
+
+```{r}
+origen <- as.Date("2018-01-01")
+df2$Fecha.num<- as.numeric(difftime(df2$Fecha, origen, units = "days"))
+
+df3 <- kNN(df2, variable = c("SO2"), dist_var = c("X_UTM30N", "Y_UTM30N", "Fecha.num"), k = 1)
+```
+
+```{r}
+df2 <- kNN(df3, variable = c("SO2"), dist_var = c("X_UTM30N", "Y_UTM30N", "Fecha"), k = 1)
+```
+
+```{r}
+library(readr)
+imputed_datas <- read_csv("data/imputed_datas.csv")
+
+hist(imputed_datas$NO2.num)
+```
+
+
+```{r}
+x <- imputed_datas$SO2.num
+y <- character(length = length(x))
+
+for (i in 1:length(x)) {
+  if (x[i] >= 0 & x[i] <= 100) {
+    y[i] <- "Buena"
+  } else if (x[i] >= 101 & x[i] <= 200) {
+    y[i] <- "Razonablemente Buena"
+  } else if (x[i] >= 201 & x[i] <= 350) {
+    y[i] <- "Regular"
+  } else if (x[i] >= 351 & x[i] <= 500) {
+    y[i] <- "Desfavorable"
+  } else if (x[i] >= 501 & x[i] <= 750) {
+    y[i] <- "Muy desfavorable"
+  } else if (x[i] >= 751 & x[i] <= 1250) {
+    y[i] <- "Extremadamente desfavorable"
+  }
+}
+
+df$SO2.cat <- y
+```
+
+
+```{r}
+df$SO2.cat <- factor(df$SO2.cat, ordered = TRUE, levels = c(
+  "Buena", "Razonablemente Buena", "Regular", 
+  "Desfavorable", "Muy desfavorable", "Extremadamente desfavorable"))
+```
+
+
+```{r}
+path <-  "imputed_cat.csv"
+write.csv(df, file =path, row.names = FALSE)
+
+```
+
+```{r}
+df$NO2.cat <- as.factor(df$NO2.cat)
+```
+
+```{r}
+library(readr)
+df <- read_csv("imputed_cat.csv")
+```
+```{r}
+
+df$SO3.cat <- factor(df$SO3.cat, levels = c(
+  "Buena", "Razonablemente Buena", "Regular", 
+  "Desfavorable", "Muy desfavorable", "Extremadamente desfavorable", ordered = T))
+
+```
+
+```{r}
+j <- df
+
+# Assuming your data frame is named 'df' and you have five factor columns: A, B, C, D, E
+j$ICA <- apply(j[,c("NO2.cat", "O3.cat", "PM10.cat", "PM25.cat", "SO2.cat")], 1, function(row) max(row))
+
+
+```
+
+__________________________________________
+
+
+# Primero vamos a realizar un `ggpairs` y un `ggcorr`para relacionar todos los elementos químicos con 
+todos (valores numéricos)
+
+```{r}
+
+library(GGally)
+num_cols <- c("NO2.num", "O3.num", "PM10.num", "PM25.num", "SO2.num")
+ggpairs(df[num_cols])
+```
+
+ 
+
+```{r}
+ggcorr(df[num_cols])
+```
+Como podemos ver, la relación de las variables no es clara. De forma general podemos decir que las variables
+son bastante independientes entre sí.Como excepción podríamos hablar de las variables PM10 y PM25
+
+```{r}
+Cov_Mat <- cov(df[num_cols])
+
+print("Matriz de covarianza")
+print(Cov_Mat)
+
+```
+
+
+```{r}
+Cor_Mat_S <- cor(df[num_cols], method = "spearman")
+Cor_Mat_P <- cor(df[num_cols], method = "pearson")
+
+print("Matriz de correlacion (Spearman)")
+print(Cor_Mat_S)
+print("Matriz de correlacion (Pearson)")
+print(Cor_Mat_P)
+
+```
+Ya que hemos visto que las variables PM10 y PM25, vamos a relacionar sus variables categóricas pra ver la relación.
+
+
+```{r}
+
+
+chisq.test(df$PM10.cat, df$PM25.cat, correct = F)
+
+
+
 ```
 
 

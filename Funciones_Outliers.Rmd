@@ -136,7 +136,7 @@ print(outliers_summary_transformed)
 ```{r}
 library(VIM)
 
-#df2 <- kNN(df, variable = c("NO2"), dist_var = c("LONGITUD_G", "LATITUD_G", "Fecha"), k = 1)
+df2 <- kNN(df, variable = c("NO2"), dist_var = c("LONGITUD_G", "LATITUD_G", "Fecha"), k = 1)
 
 #file_path <- 'data/pruebas_imp.csv'
 

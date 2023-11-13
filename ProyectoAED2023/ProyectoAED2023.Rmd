@@ -922,6 +922,8 @@ ggcorr(df[num_cols])
 Como podemos ver, la relación de las variables no es clara. De forma general podemos decir que las variables
 son bastante independientes entre sí.Como excepción podríamos hablar de las variables PM10 y PM25
 
+
+Ahora mostraremos las matrices de covaraianza y correlación con Pearson y Spearman
 ```{r}
 Cov_Mat <- cov(df[num_cols])
 
@@ -942,7 +944,9 @@ print(Cor_Mat_P)
 
 ```
 
-Ya que hemos visto que las variables PM10 y PM25, vamos a relacionar sus variables categóricas pra ver la relación.
+Ya que hemos visto que las variables PM10 y PM25 parece que tenganalguna relación, vamos a 
+relacionar sus equivalentes categóricas para ver si la hipótesis nula de que son independientes
+se cumple o no.
 
 
 ```{r}
@@ -952,16 +956,15 @@ chisq.test(df$PM10.cat, df$PM25.cat, correct = F)
 ```
 
 Podemos ver que el p-valor es muy pequeño, luego podemos rechazar la hipótesis de que no están relacionadas.
-Este efecto es más grande en las categóricas, ya que "medimos" por intervalos
-
-
+Este efecto es más grande en las categóricas, ya que "medimos" por intervalos. Por lo que podemos decir que
+sí tienen alguna relación entre ellas
 
 
 ## NO2
 
 ```{r}
 # Gráfico de dispersión entre NO2.num y O3.num
-ggplot(data, aes(x = NO2.num, y = O3.num)) +
+ggplot(df, aes(x = NO2.num, y = O3.num)) +
   geom_point(color = "blue") +
   labs(title = "Scatter Plot entre NO2.num y O3.num", x = "NO2.num", y = "O3.num")
 
@@ -969,14 +972,14 @@ ggplot(data, aes(x = NO2.num, y = O3.num)) +
 
 ```{r}
 # Matriz de correlación
-cor(data[, c("NO2.num", "O3.num", "PM10.num", "PM25.num", "SO2.num")])
+cor(df[, c("NO2.num", "O3.num", "PM10.num", "PM25.num", "SO2.num")])
 
 ```
 
 
 ```{r}
 # Gráfico de barras agrupadas para la variable TIPO_AREA y NO2.num
-ggplot(data, aes(x = TIPO_AREA, y = NO2.num, fill = TIPO_AREA)) +
+ggplot(df, aes(x = TIPO_AREA, y = NO2.num, fill = TIPO_AREA)) +
   geom_bar(stat = "summary", fun = "mean", position = "dodge") +
   labs(title = "Promedio de NO2.num por TIPO_AREA", x = "TIPO_AREA", y = "Promedio NO2.num")
 
@@ -985,7 +988,7 @@ ggplot(data, aes(x = TIPO_AREA, y = NO2.num, fill = TIPO_AREA)) +
 
 ```{r}
 # Mapa de calor de la matriz de correlación
-cor_matrix <- cor(data[, c("NO2.num", "O3.num", "PM10.num", "PM25.num", "SO2.num")])
+cor_matrix <- cor(df[, c("NO2.num", "O3.num", "PM10.num", "PM25.num", "SO2.num")])
 heatmap(cor_matrix, col = colorRampPalette(c("blue", "white", "red"))(50), 
         main = "Mapa de Calor de Correlación")
 
@@ -995,7 +998,7 @@ heatmap(cor_matrix, col = colorRampPalette(c("blue", "white", "red"))(50),
 
 ```{r}
 # Gráfico de líneas para NO2.num y O3.num a lo largo del tiempo
-ggplot(data, aes(x = Fecha)) +
+ggplot(df, aes(x = Fecha)) +
   geom_line(aes(y = NO2.num, color = "NO2")) +
   geom_line(aes(y = O3.num, color = "O3")) +
   labs(title = "Evolución de NO2.num y O3.num a lo largo del tiempo", x = "Fecha", y = "Concentración") +
@@ -1007,18 +1010,11 @@ ggplot(data, aes(x = Fecha)) +
 
 ```{r}
 # Boxplot para comparar la distribución de NO2.num en diferentes estaciones
-ggplot(data, aes(x = year, y = NO2.num, fill = ESTACION)) +
+ggplot(df, aes(x = year, y = NO2.num, fill = ESTACION)) +
   geom_boxplot() +
   labs(title = "Distribución de NO2.num por Estación", x = "Estación", y = "NO2.num")
 
 ```
-
-```{r}
-# Matriz de gráficos de dispersión para varias variables
-pairs(~NO2.num + O3.num + PM10.num + PM25.num + SO2.num, data = data)
-
-```
-
 
 
 
@@ -1035,15 +1031,51 @@ ggplot() +
   geom_sf(data = data_sf, color = "red", size = 2) +
   labs(title = "Ubicación de las coordenadas en España") +
   theme_minimal()
+```
+
+Vamos a mostrar ahora un histograma de la cantidad de días en los cuales ha habido cada uno de los diferentes
+índices de la calidad del aire. Para calcular esto debemos coger todas las mediciones de un mismo día y quedarnos 
+con la peor, y esta es la calidad de aire para ese día.
+
+```{r}
 
 
-
-
-
+ggplot(df, aes(x = ICA, fill = ICA)) +
+  geom_bar(stat = "count", position = "dodge") +
+  labs(title = "Histograma de la calidad de aire diaria (peor parámetro diario)", x = "ICA", y = "Días") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
 
 
 ```
+
+Vamos ahora a probar, por ejemplo, a sacar la misma gráfica usando solo los datos de la provincia de València
+
+```{r}
+
+df_valencia <- subset(df, N_PROVINCIA == "VALENCIA")
+
+ggplot(df_valencia, aes(x = ICA, fill = factor(ICA))) +
+  geom_bar(stat = "count", position = "dodge") +
+  labs(title = "Histograma de la calidad de aire diaria (peor parámetro diario)", x = "ICA", y = "Días") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+```
+
+
+
+Podemos observar que la distribución de los datos parece mantenerse en ambos casos. Hay pocos días donde la calidad
+del aire sea buena. Por otro lado el parámetro más frecuente es el de razonablemente buena, a partir del cual
+los sucesivos van bajando hasta llegar a extremadamente desfavorable.
+
+```{r}
+mosaicplot(table(df$ICA, df$TIPO_AREA), main = "Mosaic Plot of ICA and TIPO_AREA", las = 3, color = c("red", "green", "blue"))
+
+```
+Con el mosaic plot podemos observar como a pesar de que la cantidad de días que el aire tiene una calidad
+buena no es muy diferente entre las zonas, en las zonas rurales hay menos días con calidades peores.
+
+
 
 
 

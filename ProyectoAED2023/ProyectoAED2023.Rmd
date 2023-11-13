@@ -267,6 +267,7 @@ Este enfoque permite la generación de un conjunto de datos estructurado de mane
 library(dplyr)
 library(tidyr)
 library(readxl)
+library(readr)
 library(lubridate)
 main_root<-'../data'
 carpetas<-c('2018','2019','2020','2021','2022')

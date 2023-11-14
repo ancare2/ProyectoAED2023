@@ -1,0 +1,1000 @@
+---
+title: "Análisis"
+author: " Anna Cabrerizo Requena , Luis Miguel Rioja Gallo e Issac Martí"
+date: "`r Sys.Date()` "
+output:
+  pdf_document:
+    number_sections: yes
+    toc: yes  
+---
+
+```{r message=FALSE, warning=FALSE, include=FALSE}
+# Meted aquí todas las librerias que vamos a usar
+packages = c("tidyverse","knitr",'GGally','ggplot2','sf','readr','readxl','dplyr','tidyr','kableExtra','VIM','car','ggformula')
+
+#use this function to check if each package is on the local machine
+#if a package is installed, it will be loaded
+#if any are not, the missing package(s) will be installed and loaded
+package.check <- lapply(packages, FUN = function(x) {
+  if (!require(x, character.only = TRUE)) {
+    install.packages(x, dependencies = TRUE,repos='http://cran.rediris.es')
+  }
+  library(x, character.only = TRUE)
+})
+```
+
+
+# Introducción
+
+Dentro del marco del Plan Nacional del Instituto Nacional de Estadística (INE) se encuentra el Estudio Estadístico para la Evaluación de la Calidad del Aire, además cuenta con un visor en tiempo real que determina el Índice de Calidad del Aire (ICA) de toda España. 
+
+El ICA clasifica la calidad del aire en 6 categorías: buena, razonablemente buena, regular, desfavorable, muy desfavorable y extremadamente desfavorable. A cada estación se le asigna la categoría más baja en términos de calidad del aire considerando cualquier contaminante que se evalúe. Los contaminantes incluidos en el índice son las Partículas en Suspensión (PM10), Partículas en Suspensión más finas (PM2,5), Ozono Troposférico (O3), Dióxido de Nitrógeno (NO2) y Dióxido de Azufre (SO2).
+
+Todo lo relacionado con el cálculo y límites establecidos del ICA se encuentra legislado por la Resolución del 2 de septiembre de 2020, de la Dirección General de Calidad y Evaluación Ambiental, por la que se modifica el Anexo de la Orden TEC/351/2019, de 18 de marzo, y por la que se aprueba el Índice Nacional de Calidad del Aire. Esta resolución incluye un anexo con la metodología para el cálculo del ICA.
+
+
+
+# Procesamiento de Datos
+
+Este trabajo se centra en el procesamiento de datos en el ámbito del análisis de la calidad del aire, abordando un conjunto de datos recopilados durante los años 2018-2022. Inicialmente, el dataset presentaba desafíos inherentes, como la presencia de valores faltantes y una estructura no tidy. La tarea principal consistió en transformar esta información en un formato "tidy" para garantizar la coherencia de los datos.
+
+Con un total de nueve archivos CSV por año que detallan parámetros de mediciones horarias del aire, así como, un archivo de metadatos de cada año con información relevante sobre las estaciones, el dataset depurado establece una base sólida para análisis estadísticos univariantes y bivariantes que nos permitirán abordar el estudio del ICA en los últimos cinco años en la Comunidad Autónoma de Valencia. Por lo que se establece como objetivo en el procesamiento de los datos el compilar la mayor información posible para poder obtener el ICA como variable categórica y sacar conclusiones.
+
+
+## Formato tidy
+
+En un primer paso, emprendemos la tarea de obtener un conjunto de datos consolidado a partir de nuestros registros. Este proceso implica un análisis detallado de cada año, con el objetivo de integrar las columnas correspondientes a las observaciones diarias de diversos agentes químicos del aire presentes en cada hoja de Excel. En concreto, disponemos de medidas de Partículas en suspensión (PM10 y PM2,5), Ozono troposférico (O3), Dióxido de nitrógeno (NO2), Dióxido de azufre (SO2), Benzeno (C6H6), Monóxido de Carbono (CO), Monóxido de Nitrógeno (NO) y Óxidos de Nitrógeno (NOx), cada una de las variables en un CSV diferente. La finalidad es fusionar estas columnas en una única entidad independiente que contenga todas las observaciones de dicho parámetro durante los cinco años contemplados en el estudio, además de añadirle más variables procedentes de los metadatos de las estaciones.
+
+Este enfoque permite la generación de un conjunto de datos estructurado de manera "tidy", donde cada variable se representa en una columna individual y cada observación de una variable ocupa una fila independiente. La consolidación de las diversas tablas y CSV se lleva a cabo considerando las variables comunes, es decir, los parámetros del aire analizados. Como resultado, nuestro nuevo dataset presenta una primera fila que contiene los nombres representativos de las variables, estableciendo así un marco coherente para el análisis subsiguiente.
+
+Cada archivo se encuentra estructurado originalmente de la siguiente manera:
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+library(readr)
+library(kableExtra)
+
+ds1 <- read_delim("data/2018/Datos_diarios/NO2_HH_2018.csv", 
+    delim = ";", escape_double = FALSE, trim_ws = TRUE)
+kable(head(ds1[3:10]))
+
+```
+
+En la que cada observación corresponde a la medición de las diferentes estaciones de medida de toda España, por lo que inicialmente se filtran los valores a los correspondientes a la CA de Valencia y se restructura para conseguir el valor de la variable en una única columna a lo largo del tiempo.Al ser datos horarios, y para poder establecer diariamente el peor ICA obtenido, se decide computar el valor de la variable como el máximo medido en 24 horas.
+
+Una vez cargados los dataset, se unen entre ellos para obtener un conjunto de datos en el que las variables estan repartidas en cada columna:
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+library(tidyr)
+library(dplyr)
+library(lubridate)
+main_root<-'data'
+carpetas<-c('2018','2019','2020','2021','2022')
+subcarpeta1<-'Datos_diarios'
+z_f<-list()
+n=0
+for (c in carpetas){
+  files<-dir(paste(main_root,c,subcarpeta1,sep='/'))
+  df_t<-list()
+  names<-list()
+  n=n+1
+  i=1
+  for (file in files){
+    ds1 <- read_delim(paste(main_root,c,subcarpeta1,file,sep='/'), 
+    delim = ";", escape_double = FALSE, trim_ws = TRUE)
+    ds1<-ds1[ds1$PROVINCIA==3|ds1$PROVINCIA==12|ds1$PROVINCIA==46,]
+    ds_1t <- pivot_longer(ds1, -(PROVINCIA:DIA),names_to = "HORA", values_to = 'Valor', names_prefix = 'H')
+    ds_1t <- ds_1t[, -which(names(ds_1t) == "MAGNITUD")]
+    ds_1t <- ds_1t[, -which(names(ds_1t) == "PUNTO_MUESTREO")]
+    ds_1t<-mutate(ds_1t,Fecha=ymd(paste(ANNO,MES,DIA,sep='-')))
+    ds_1t<-select(ds_1t,-c('ANNO','MES','DIA'))
+    ds_1t <- ds_1t %>% 
+    group_by(Fecha,MUNICIPIO,PROVINCIA,ESTACION) %>%
+    summarise(Valor=max(Valor,na.rm=TRUE))
+    new_name=paste(strsplit(file,'_')[[1]][1],'num',sep='.')
+    ds_1t[new_name]<-ds_1t$Valor
+    ds_1t<-select(ds_1t,-c('Valor'))
+    df_t[[i]]<-ds_1t
+    names[[i]]<-new_name
+    i=i+1
+  }
+  
+  z<-merge(df_t[[1]],df_t[[2]],all=TRUE)
+  for (i in 3:length(df_t)){
+    z<-merge(z,df_t[[i]],all=TRUE)
+    
+  }
+  
+z_f[[n]]<-z
+}
+kable(head(z[1:6]))
+
+```
+
+Posteriormente se cargan los metadatos correspondientes a cada año y añadimos las variables de Tipo de Área (Urbana, Suburbana y Rural), Latitud y Longitud de la estación de medida, y los nombres del Municipio y Provincia donde se encuentran.
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# METADATOS
+library(readxl)
+# Para 2018
+meta_df <- read_excel("data/2018/Metadatos/metainformacion_2018_tcm30-501408.xlsx", sheet="Estaciones evaluación 2018")
+meta_df<-meta_df[meta_df$N_RED=='CCAA Com. Valenciana',]
+z<-z_f[[1]]
+z_2018<-merge.data.frame(meta_df,z, by=c('PROVINCIA','MUNICIPIO','ESTACION'))
+columnas<-c('N_PROVINCIA','N_MUNICIPIO','LATITUD_G','LONGITUD_G','TIPO_AREA',colnames(z))
+z_2018<-z_2018 %>% select(all_of(columnas))
+z_2018<-select(z_2018,-c('PROVINCIA','MUNICIPIO'))
+
+# Para 2019
+meta_df <- read_excel("data/2019/Metadatos/metainformacion_2019_tcm30-513561.xlsx", sheet="Estaciones evaluación 2019")
+meta_df<-meta_df[meta_df$N_RED=='CCAA Com. Valenciana',]
+z<-z_f[[2]]
+z_2019<-merge.data.frame(meta_df,z, by=c('PROVINCIA','MUNICIPIO','ESTACION'))
+columnas<-c('N_PROVINCIA','N_MUNICIPIO','LATITUD_G','LONGITUD_G','TIPO_AREA',colnames(z))
+z_2019<-z_2019 %>% select(all_of(columnas))
+z_2019<-select(z_2019,-c('PROVINCIA','MUNICIPIO'))
+
+# Para 2020
+meta_df <- read_excel("data/2020/Metadatos/metainformacionestacionesymagnitudes2020_tcm30-531266.xlsx", 
+    sheet = "Estaciones")
+meta_df<-meta_df[meta_df$N_RED=='CCAA Com. Valenciana',]
+z<-z_f[[3]]
+z_2020<-merge.data.frame(meta_df,z, by=c('PROVINCIA','MUNICIPIO','ESTACION'))
+columnas<-c('N_PROVINCIA','N_MUNICIPIO','LATITUD_G','LONGITUD_G','TIPO_AREA',colnames(z))
+z_2020<-z_2020 %>% select(all_of(columnas))
+z_2020<-select(z_2020,-c('PROVINCIA','MUNICIPIO'))
+
+# Para 2021
+meta_df <- read_excel("data/2021/Metadatos/metainformacion2021_tcm30-545563.xlsx", sheet="Estaciones")
+meta_df<-meta_df[meta_df$N_RED=='CCAA Com. Valenciana',]
+z<-z_f[[4]]
+z_2021<-merge.data.frame(meta_df,z, by=c('PROVINCIA','MUNICIPIO','ESTACION'))
+columnas<-c('N_PROVINCIA','N_MUNICIPIO','LATITUD_G','LONGITUD_G','TIPO_AREA',colnames(z))
+z_2021<-z_2021 %>% select(all_of(columnas))
+z_2021<-select(z_2021,-c('PROVINCIA','MUNICIPIO'))
+
+# Para 2022
+meta_df <- read_excel("data/2022/Metadatos/Metainformacion2022.xlsx", sheet="Estaciones")
+meta_df<-meta_df[meta_df$N_RED=='CCAA Com. Valenciana',]
+z<-z_f[[5]]
+z_2022<-merge.data.frame(meta_df,z, by=c('PROVINCIA','MUNICIPIO','ESTACION'))
+columnas<-c('N_PROVINCIA','N_MUNICIPIO','LATITUD_G','LONGITUD_G','TIPO_AREA',colnames(z))
+z_2022<-z_2022 %>% select(all_of(columnas))
+z_2022<-select(z_2022,-c('PROVINCIA','MUNICIPIO'))
+z_2021$NO.num<-NA
+z_2022$NO.num<-NA
+df<-rbind(z_2018,z_2019,z_2020,z_2021,z_2022)
+kable(head(df[1:5]))
+```
+
+En un primer análisis rápido de las variables observamos una gran cantidad de valores perdidos,
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+library(VIM)
+
+aggr(df[,6:14], prop = FALSE, combined = TRUE, numbers = TRUE, sortVars = TRUE, sortCombs = TRUE)
+
+```
+
+
+esto es debido a que no en todas las estaciones se miden las mismas variables, por lo que tenemos valores perdidos de tipo MNAR, para solucionar esto, lo establecido en la metodología es usar el valor de la estación más próxima, por ello y para preparar los datos, se transforma la latitud y longitud a coordenadas proyectadas, de esta manera nos garantizamos poder usar distancias euclideas en caso de imputación por proximidad, además se pasan las fecha a días desde el 01-01-2018, que es la fecha de la primera observación de nuestro conjunto, para establecer una tercera dimensión de proximidad en tiempo. Por último se categoriza la variable de Tipo de Area donde se encuentra la estación.
+
+```{r eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
+
+df<-mutate(df,TIPO_AREA=as.factor(TIPO_AREA))
+origen <- as.Date("2018-01-01")
+df$Dias<- as.numeric(difftime(df$Fecha, origen, units = "days"))
+df <- st_as_sf(df, coords = c('LONGITUD_G','LATITUD_G'), crs = 4326)
+df<-st_transform(df,crs=32630)
+X_UTM30N<-c()
+Y_UTM30N<-c()
+for (i in 1:nrow(df)){
+  X_UTM30N<-c(X_UTM30N,st_bbox(df$geometry[i])[[1]])
+  Y_UTM30N<-c(Y_UTM30N,st_bbox(df$geometry[i])[[2]])
+}
+df$X_UTM30N<-X_UTM30N
+df$Y_UTM30N<-Y_UTM30N
+df<-data.frame(df)
+#write.csv(df,'../data/join_datas.csv')
+```
+
+## Limpieza de datos
+
+Una vez adquirido un conjunto de datos organizado en formato tidy, es necesario llevar a cabo un proceso de limpieza. Este procedimiento implica la evaluación minuciosa de cada inconsistencia, tales como los valores faltantes (NAs) y los valores atípicos (outliers). Con el propósito de abordar estas discrepancias, se implementan diversos procedimientos y técnicas especializadas.
+
+Como es ampliamente conocido, un "outlier" se define como un valor atípico en un conjunto de datos que exhibe una marcada disparidad con respecto al resto de las observaciones. Para analizar la presencia de tales observaciones atípicas, se emplean tres técnicas específicas: la regla de 3 sigma, la regla de Hampel, la regla de boxplot y la regla de los percentiles. Obtuvimos la siguiente tabla:
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+# Método 3-Sigma
+df <- read_csv("data/join_datas.csv") #Hemos guardado el csv con el formato tidy para cargarlo automáticamente y no tener que estas procesando todos los pasos anteriores
+
+find_outliers_3sigma <- function(x) {
+  x <- na.omit(x)
+  mean_val <- mean(x)
+  sd_val <- sd(x)
+  lower_bound <- mean_val - 3 * sd_val
+  upper_bound <- mean_val + 3 * sd_val
+  outliers <- x[x < lower_bound | x > upper_bound]
+  positions <- which(x %in% outliers)
+  return(list(values = outliers, positions = positions))
+}
+
+# Método IQR(Boxplot)
+
+find_outliers_iqr <- function(x) {
+  x <- na.omit(x)
+  q1 <- quantile(x, 0.25)
+  q3 <- quantile(x, 0.75)
+  iqr <- q3 - q1
+  lower_bound <- q1 - 1.5 * iqr
+  upper_bound <- q3 + 1.5 * iqr
+  outliers <- x[x < lower_bound | x > upper_bound]
+  positions <- which(x %in% outliers)
+  return(list(values = outliers, positions = positions))
+}
+
+
+# Método del Hampel
+find_outliers_hampel <- function(df_column, k = 3) {
+  x <- na.omit(df_column)
+  med <- median(x)
+  mad <- median(abs(x - med))
+  threshold <- k * 1.4826 * mad
+  outliers <- x[abs(x - med) > threshold]
+  positions <- which(df_column %in% outliers)
+  return(list(values = outliers, positions = positions))
+}
+
+# Método de los percentiles
+find_outliers_percentile <- function(x) {
+  x <- na.omit(x)
+  lower_bound <- quantile(x, 0.05)
+  upper_bound<- quantile(x, 0.95)
+  outliers <- x[x < lower_bound | x > upper_bound]
+  positions <- which(x %in% outliers)
+  return(list(values = outliers, positions = positions))
+}
+```
+
+
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+# Aplicamos a nuestros datos los métodos anteriores
+
+columnas_analizar <- c('C6H6.num','CO.num','NO.num',"NO2.num", "NOx.num", "O3.num", "PM10.num", "PM25.num", "SO2.num")
+
+#outliers_3sigma_list <- lapply(df[columnas_analizar], find_outliers_3sigma)
+outliers_hampel_list <- lapply(df[columnas_analizar], find_outliers_hampel)
+outliers_iqr_list <- lapply(df[columnas_analizar], find_outliers_iqr)
+outliers_percentile_list <- lapply(df[columnas_analizar], find_outliers_percentile)
+
+#print("Outliers detectados usando la regla 3-sigma:")
+#print(outliers_3sigma_list)
+
+#print("Outliers detected using Hampel identifier:")
+#print(outliers_hampel_list)
+
+#print("Outliers detected using IQR(Boxplot):")
+#print(outliers_iqr_list)
+
+#print("Outliers detected using IQR:")
+#print(outliers_percentile_list)
+
+```
+
+
+Aquí utilizamos los códigos implementados anteriormente en cada una de las variables numéricas para detectar los outliers
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+outliers_summary <- data.frame(Chemical_Element = rep(columnas_analizar, each = 3),
+                                Method = rep(c( "IQR", "Hampel", "Percentil"), times = length(columnas_analizar)),
+                                Outliers_Count = c(
+
+                                  sapply(outliers_iqr_list, function(x) length(x$values)),
+                                  sapply(outliers_hampel_list, function(x) length(x$values)),
+                                  sapply(outliers_percentile_list, function(x) length(x$values))
+                                ))
+```
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+library(tidyverse)
+
+outliers_summary_transformed <- outliers_summary %>%
+  pivot_wider(names_from = Method, values_from = Outliers_Count)
+
+print(outliers_summary_transformed)
+```
+
+En esta tabla visualizamos un recuento de la cantidad de outliers detectados con cada método. 
+
+
+Ahora bien, analizando los valores posibles dentro del marco establecido por el BOE (se muestran valores extremos en la tabla adjunta), se decide analizar esos posibles datos anómalos, comprobando si alguno exdece de los límites, y ante la inexistencia de ellos y por conveniencia ante la gran presencia de valores faltantes, se decide no eliminar ningún dato. 
+
+
+| $S0_{2}$ | PM2,5 | PM10 | $O_{3}$ | $NO_{2}$ | CATEGORÍA DEL ÍNDICE |
+|--------|-------|------|-------|--------|----------------------|
+| 751-1250| 76-800| 151-1200| 381-800 | 341-1000 | Extremadamente Desfavorable|
+
+
+
+```{r eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
+(max_values <- lapply(outliers_3sigma_list, function(x) max(x$values, na.rm = TRUE)))
+(min_values <- lapply(outliers_3sigma_list, function(x) min(x$values, na.rm = TRUE)))
+
+(max_values <- lapply(outliers_hampel_list, function(x) max(x$values, na.rm = TRUE)))
+(min_values <- lapply(outliers_hampel_list, function(x) min(x$values, na.rm = TRUE)))
+
+(max_values <- lapply(outliers_iqr_list, function(x) max(x$values, na.rm = TRUE)))
+(min_values <- lapply(outliers_iqr_list, function(x) min(x$values, na.rm = TRUE)))
+
+(max_values <- lapply(outliers_percentile_list, function(x) max(x$values, na.rm = TRUE)))
+(min_values <- lapply(outliers_percentile_list, function(x) min(x$values, na.rm = TRUE)))
+```
+
+## Imputación NAs
+
+El siguiente paso en el proceso de limpieza de nuestro conjunto de datos implica la imputación de los valores faltantes, comúnmente conocidos como NAs. Para abordar esta tarea, hemos estudiado diversas técnicas en clase, entre las cuales se incluyen: la eliminación de datos, la imputación con un valor estimado basado en los valores conocidos, la imputación mediante un modelo predictivo o la imputación al valor más cercano utilizando el algoritmo KNN (k-vecinos más cercanos).
+
+Para ello se realiza un análisis preliminar de los datos, calculando las correlaciones entre variables.
+
+A pesar de que el ICA solo usa 5 de las 9 variables que disponemmos, se ha decidido dejarlas inicialmente por si exsite alguna relación que las conviertan en posibles predictores de datos faltantes, por lo que se inicialmentes todas las posibles correlaciones entre las variables, observandose una fuerte correlación entre los Óxidos Nitroso.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+ggpairs(df[,8:10])
+```
+
+y decidiendose usar las variables NO y NOx para inferir los datos faltantes del NO2, compuesto necesario para calcular el ICA. 
+
+Tras analizar los datos de NOx y NO se observa que no existen datos en los años 2021 y 2022 por lo que se acota la posibilidad de inferencia del 2018 al 2020.
+
+De manera que se entrena un modelo lineal múltiple, uno generalizado con la familia Gamma, que es la que segíun la distribución del NO2 es la que mejor se ajusta y tiene el menor AIC y una de poisson, tras evaluar los modelos y a pesar de que la distribución de los residuos no es normal, se decide usar el modelo lineal por obtener mejores estadísticos con los siguientes resultados para el conjunto de test:
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+df_imp<-df[df$Fecha>='2018-01-01' & df$Fecha<='2020-12-31',]
+sample <- sample(c(TRUE, FALSE), nrow(df_imp), replace=TRUE, prob=c(0.8,0.2))
+train  <- df_imp[sample, ]
+test   <- df_imp[!sample, ]
+lm.NO2<-lm(NO2.num~NOx.num+NO.num,train)
+print(summary(lm.NO2))
+predict<-predict.lm(lm.NO2,test)
+RMSE<-sqrt(mean((test$NO2.num-predict) ^ 2, na.rm=T))
+cat('RMSE con el conjunto de test= ',RMSE)
+
+```
+
+El problema es que la mayoría de estaciones que no obtienen los datos de NO2 tampoco los obtiene de la familia de los Óxidos Nitrosos.
+
+Es por ello que se decide imputar por proximidad geográfica y en el tiempo los datos de los Óxidos Nitrosos para posteriormente usarlo para inferir los datos del NO2 con el modelo entrenado.
+
+```{r eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
+
+df_imp2<-kNN(df_imp,'NO.num',k=1, dist_var=c('X_UTM30N','Y_UTM30N','Dias'))
+df_imp2<-kNN(df_imp2,'NOx.num',k=1, dist_var=c('X_UTM30N','Y_UTM30N','Dias'))
+predict<-predict.lm(lm.NO2,test)
+RMSE<-sqrt(mean((test$NO2.num-round(predict)) ^ 2, na.rm=T))
+df_imp2[is.na(df_imp2$NO2.num),]$NO2.num<-predict.lm(lm.NO2,df_imp2[is.na(df_imp2$NO2.num),])
+df_imp2<-mutate(df_imp2,NO2.num=round(df_imp2$NO2.num))
+df_imp2[df_imp2$NO2.num<0,]$NO2.num<-NA
+df[df$Fecha>='2018-01-01' & df$Fecha<='2020-12-31',]$NO2.num<-df_imp2$NO2.num
+
+```
+
+Para finalizar se imputan el resto de datos faltantes por proximidad geográfica y temporal, como establece la metodología y que anteriormente adecuamos con la transformación de variables, y se eliminan las variables que no necesitamos para el cálculo del ICA (Bencenos, Monóxido de Carbono, Óxidos Nitrosos y Monóxido de Nitrógeno).
+
+```{r eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
+
+
+df<-df %>% select(-c('C6H6.num','CO.num','NO.num','NOx.num'))
+df_imp1<-kNN(df,'SO2.num',k=1, dist_var=c('X_UTM30N','Y_UTM30N','Dias'))
+df_imp1<-kNN(df_imp1,'O3.num',k=1, dist_var=c('X_UTM30N','Y_UTM30N','Dias'))
+df_imp1<-kNN(df_imp1,'PM25.num',k=1, dist_var=c('X_UTM30N','Y_UTM30N','Dias'))
+df_imp1<-kNN(df_imp1,'PM10.num',k=1, dist_var=c('X_UTM30N','Y_UTM30N','Dias'))
+df_imp1<-kNN(df_imp1,'NO2',k=1, dist_var=c('X_UTM30N','Y_UTM30N','Fecha.num'))
+no_valids_var<-c('NO2_imp','O3_imp','PM10_imp','PM25_imp','SO2_imp')
+df2<-df %>% select(all_of(no_valids_var))
+df<-df %>% select(-no_valids_var)
+```
+
+
+Una vez tenemos imputados los datos vamos se agregan columnas adicionales que representan de forma categórica el nivel de cada elemento desde "Buena" hasta "Extremadamente desfavorable" conforme a lo establecido por la legislación y añadimos una nueva variable que es el compuesto más desfavorable diario.
+
+
+```{r eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
+
+library(readr)
+path <- ("data/imputed_datas.csv")
+df <- read_csv(path)
+list.files()
+
+x <- df$SO2.num
+y <- character(length = length(x))
+
+for (i in 1:length(x)) {
+  if (x[i] >= 0 & x[i] <= 100) {
+    y[i] <- "Buena"
+  } else if (x[i] >= 101 & x[i] <= 200) {
+    y[i] <- "Razonablemente Buena"
+  } else if (x[i] >= 201 & x[i] <= 350) {
+    y[i] <- "Regular"
+  } else if (x[i] >= 351 & x[i] <= 500) {
+    y[i] <- "Desfavorable"
+  } else if (x[i] >= 501 & x[i] <= 750) {
+    y[i] <- "Muy desfavorable"
+  } else if (x[i] >= 751 & x[i] <= 1250) {
+    y[i] <- "Extremadamente desfavorable"
+  }
+}
+
+df$SO2.cat <- y
+```
+
+Una vez se obtiene el valor categórico de cada variable, se establece el Indice global diario como el peor de los individuales.
+
+```{r eval=FALSE, message=TRUE, warning=TRUE, include=FALSE}
+df<- read_csv("data/imputed_cat.csv", 
+    col_types = cols(Fecha = col_date(format = "%Y-%m-%d")))
+df<-df[,-1]
+df2<-df %>% select(c(ends_with('.cat')))
+ica<-data.frame(ICA=NA)
+for( i in 1:nrow(df2)){
+  a<-arrange(pivot_longer(df2[i,],cols=colnames(df2), names_to='A',values_to = 'ICA'),ICA)
+  ica<-rbind(ica,a[5,'ICA'])
+}
+df$ICA<-na.omit(ica$ICA)
+```
+
+
+```{r message=FALSE, warning=FALSE}
+df <- read_csv("data/dataset_final.csv", 
+    col_types = cols(...1 = col_skip(), ...2 = col_skip(), 
+        Fecha = col_date(format = "%Y-%m-%d")))
+levels<-c('Buena','Razonablemente Buena','Regular','Desfavorable','Muy desfavorable','Extremadamente desfavorable')
+
+comp<-read_csv("data/worst_comp.csv")
+df$component<-comp$x
+df<-df%>% mutate(TIPO_AREA=as.factor(TIPO_AREA))%>%mutate(across(c(ends_with('.cat')), factor,level=levels))%>% mutate(ICA=factor(ICA,level=levels))
+```
+
+# Análisis Exploratorio
+
+## Distribuciones
+
+En esta sección, procederemos a llevar a cabo un análisis univariante sobre el conjunto de datos previamente procesado. El propósito principal de esta evaluación consiste en examinar individualmente cada variable presente en el dataset, con el objetivo de obtener un panorama detallado de su distribución y variabilidad.
+
+En primer lugar, para tener una visión global de este dataset sacamos un resumen estadístico
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# Resumen estadístico
+data <- df
+```
+
+
+
+|                  | Fecha       | $NO_{2}$ | $O_{3}$ | PM10   | PM25   | $SO_{2}$ |
+|------------------|-------------|----------|---------|--------|--------|----------|
+| *Mínimo*       | 2018-01-01  | 1.00     | 1.00    | 1.00   | 0.00   | 1.00     |
+| *Q1*           | 2019-04-07  | 9.00     | 74.00   | 12.00  | 7.00   | 3.00     |
+| *Mediana*      | 2020-07-06  | 21.00    | 88.00   | 22.00  | 12.00  | 4.00     |
+| *Media*        | 2020-07-04  | 27.91    | 88.60   | 29.34  | 15.42  | 6.359    |
+| *Q3*           | 2021-10-04  | 41.00    | 103.00  | 37.00  | 19.00  | 6.00     |
+| *Máximo*       | 2022-12-31  | 229.00   | 207.00  | 757.00 | 296.00 | 239.00   |
+
+Una vez obtenidos los estadísticos. Visualizamos nuestras variables.
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+library(ggplot2)
+library(grid)
+
+create_histogram <- function(data, contaminante, x_label) {
+  ggplot(data, aes(x = get(paste0(contaminante, ".num")))) +
+    geom_histogram(binwidth = 5, fill = "blue", color = "black", alpha = 0.7) +
+    labs(title = paste("Distribución de", contaminante), x = x_label) +
+    theme_minimal()
+}
+
+graficas <- lapply(c("NO2", "O3", "PM10", "PM25", "SO2"), function(contaminante) {
+  create_histogram(data, contaminante, paste("Concentración de", contaminante))
+})
+
+# Combinamos las gráficas en una única representación
+multiplot <- function(..., plotlist = NULL, cols = 1, layout = NULL) {
+  require(grid)
+
+  
+  plots <- c(list(...), plotlist)
+
+  numPlots = length(plots)
+
+  
+  if (is.null(layout)) {
+    layout <- matrix(seq(1, cols * ceiling(numPlots/cols)),
+                     ncol = cols, nrow = ceiling(numPlots/cols))
+  }
+
+  if (numPlots == 1) {
+    print(plots[[1]])
+
+  } else {
+    
+    grid.newpage()
+    pushViewport(viewport(layout = grid.layout(nrow(layout), ncol(layout))))
+
+    for (i in 1:numPlots) {
+      
+      matchidx <- as.data.frame(which(layout == i, arr.ind = TRUE))
+
+      print(plots[[i]], vp = viewport(layout.pos.row = matchidx$row,
+                                      layout.pos.col = matchidx$col))
+    }
+  }
+}
+
+multiplot(plotlist = graficas, cols = 2)
+
+```
+
+La representación gráfica previa proporciona una visión general de la concentración de cada elemento en nuestro conjunto de datos. La representación más notable en términos de su estructura y forma corresponde al elemento $O_{3}$, ya que parece seguir una distribución gaussiana o log-gaussiana. Los datos están distribuidos de manera uniforme a lo largo del eje x, que representa la concentración, y muestran una distribución alrededor de la media y la mediana, ambas con valores muy similares, como se confirmó en los estadísticos previamente descritos. (88.60 y 88.00 respectivamente).
+
+En contraste, las representaciones de los otros elementos exhiben una asimetría significativa, con valores relativamente altos al principio seguidos de una disminución. Estas observaciones son respaldadas numéricamente por los estadísticos calculados anteriormente. Por ejemplo, al considerar el elemento $S0_{2}$, se observa un valor máximo de 239,000. Sin embargo, la media calculada es de 6,359, un valor considerablemente distante del máximo mencionado. Además, el valor mínimo es 1, mientras que la mediana es 4,000. Estas discrepancias justifican la representación gráfica de esta información. Esto mismo sucedería con los elementos restantes.
+
+```{r eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
+library(ggplot2)
+library(devtools)
+library(ggpubr)
+
+par(mfrow = c(2,3))
+# Crear gráficos de densidad
+p1 <- ggplot(data, aes(x = NO2.num, fill = "NO2")) +
+  geom_density(alpha = 0.5) +
+  labs(title = "Densidad de NO2", x = "Concentración de NO2")
+
+p2 <- ggplot(data, aes(x = O3.num, fill = "O3")) +
+  geom_density(alpha = 0.5) +
+  labs(title = "Densidad de O3", x = "Concentración de O3")
+
+p3 <- ggplot(data, aes(x = PM10.num, fill = "PM10")) +
+  geom_density(alpha = 0.5) +
+  labs(title = "Densidad de PM10", x = "Concentración de PM10")
+
+p4 <- ggplot(data, aes(x = PM25.num, fill = "PM2.5")) +
+  geom_density(alpha = 0.5) +
+  labs(title = "Densidad de PM2.5", x = "Concentración de PM2.5")
+
+p5 <- ggplot(data, aes(x = SO2.num, fill = "SO2")) +
+  geom_density(alpha = 0.5) +
+  labs(title = "Densidad de SO2", x = "Concentración de SO2")
+
+ggarrange(p1, p2, p3, p4, p5, 
+          ncol = 2, nrow = 3)
+
+```
+#Análisis temporal.
+
+A continuación, procederemos a visualizar la evolución de los compuestos químicos a lo largo del tiempo, con el objetivo de realizar un análisis más exhaustivo sobre la calidad del aire.
+
+```{r message=FALSE, warning=FALSE, include=FALSE}
+moda <- function(x) {
+   a <- unique(x)
+   a[which.max(tabulate(match(x, a)))]
+}
+
+data_scaled<-df
+data_scaled$mensual<-format(as.Date(df$Fecha, formato ="%Y-%m-%d"),"%Y-%m")
+data_scaled$mensual<-ym(data_scaled$mensual)
+data_scaled <- data_scaled %>%
+  group_by(N_PROVINCIA,mensual)%>%
+  summarise(NO2.num=max(NO2.num),
+    O3.num=max(O3.num), 
+    PM10.num=max(PM10.num),
+    PM25.num=max(PM25.num), 
+    SO2.num=max(SO2.num),
+    ICA.num=moda(ICA))%>%
+  mutate(
+    NO2_scaled = (NO2.num - min(NO2.num)) / (max(NO2.num) - min(NO2.num)),
+    O3_scaled = (O3.num - min(O3.num)) / (max(O3.num) - min(O3.num)),
+    PM10_scaled = (PM10.num - min(PM10.num)) / (max(PM10.num) - min(PM10.num)),
+    PM25_scaled = (PM25.num - min(PM25.num)) / (max(PM25.num) - min(PM25.num)),
+    SO2_scaled = (SO2.num - min(SO2.num)) / (max(SO2.num) - min(SO2.num))
+  )
+
+#data_scaled<-data_scaled%>%mutate(mensual=lubridate::ym(mensual))%>%arrange(mensual)
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+library(ggformula)
+ggplot(data_scaled, aes(x = mensual)) +
+  geom_spline(aes(y = NO2_scaled, color = "NO2"), df = 10, size = 1, linetype = "solid") +
+  geom_spline(aes(y = O3_scaled, color = "O3"), df = 10, size = 1, linetype = "solid") +
+  geom_spline(aes(y = PM10_scaled, color = "PM10"), df = 10, size = 1, linetype = "solid") +
+  geom_spline(aes(y = PM25_scaled, color = "PM25"), df = 10, size = 1, linetype = "solid") +
+  geom_spline(aes(y = SO2_scaled, color = "SO2"), df = 10, size = 1, linetype = "solid") +
+  labs(title = "Concentración de Compuestos Químicos a lo largo del tiempo",
+       x = "Año",
+       y = "Concentración Escalada 0 - 1")+ 
+  scale_color_manual(name = "Compuesto",
+                     values = c(NO2 = "red", O3 = "blue", PM10 = "green", PM25 = "purple", SO2 = "orange"))
+```
+De esta gráfica observamos claramente como aquellos compuesto que derivan más de la contaminación humana como es el dióxido de nitrógeno o el de azufre, a partir de comienzos del 2020 tienen una ligera tendencia a la baja ocasionada por el COVID, mientras que aquellos compuestos que dependen más de las condiciones meteorológicas parecen mantener una cierta estabilidad, tambíen se observa la estacionalidad del Ozono, alcanzando sus máximos en verano. 
+
+```{r eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
+library(tidyverse)
+library(ggplot2)
+
+# Convertir Fecha a formato de fecha
+data$Fecha <- as.Date(data$Fecha)
+
+# Aplicar la estandarización min-max a los datos por año
+data_scaled <- data %>%
+  group_by(year = lubridate::year(Fecha)) %>%
+  mutate(
+    NO2_scaled = (NO2.num - min(NO2.num)) / (max(NO2.num) - min(NO2.num)),
+    O3_scaled = (O3.num - min(O3.num)) / (max(O3.num) - min(O3.num)),
+    PM10_scaled = (PM10.num - min(PM10.num)) / (max(PM10.num) - min(PM10.num)),
+    PM25_scaled = (PM25.num - min(PM25.num)) / (max(PM25.num) - min(PM25.num)),
+    SO2_scaled = (SO2.num - min(SO2.num)) / (max(SO2.num) - min(SO2.num))
+  )
+
+# Crear un gráfico de líneas superpuestas con datos escalados, facet_wrap por año y suavizado por media mensual
+ggplot(data_scaled, aes(x = Fecha, color = "Compuesto")) +
+  geom_line(aes(y = NO2_scaled, color = "NO2")) +
+  geom_line(aes(y = O3_scaled, color = "O3")) +
+  geom_line(aes(y = PM10_scaled, color = "PM10")) +
+  geom_line(aes(y = PM25_scaled, color = "PM25")) +
+  geom_line(aes(y = SO2_scaled, color = "SO2")) +
+  geom_smooth(aes(y = NO2_scaled), method = "loess", se = FALSE, color = "red") +
+  geom_smooth(aes(y = O3_scaled), method = "loess", se = FALSE, color = "blue") +
+  geom_smooth(aes(y = PM10_scaled), method = "loess", se = FALSE, color = "green") +
+  geom_smooth(aes(y = PM25_scaled), method = "loess", se = FALSE, color = "purple") +
+  geom_smooth(aes(y = SO2_scaled), method = "loess", se = FALSE, color = "orange") +
+  labs(title = "Concentración de Compuestos Químicos a lo largo del tiempo (Escala min-max)",
+       x = "Años",
+       y = "Concentración") +
+  scale_color_manual(values = c("NO2" = "red", "O3" = "blue", "PM10" = "green", "PM25" = "purple", "SO2" = "orange")) +
+  theme_minimal() +
+  facet_wrap(~year, scales = "free_y", ncol = 2)
+
+```
+
+
+```{r eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
+library(tidyverse)
+library(ggplot2)
+
+# Aplicar la estandarización min-max a los datos por año
+data_scaled <- data %>%
+  group_by(year = lubridate::year(Fecha)) %>%
+  mutate(
+    NO2_scaled = (NO2.num - min(NO2.num)) / (max(NO2.num) - min(NO2.num)),
+    O3_scaled = (O3.num - min(O3.num)) / (max(O3.num) - min(O3.num)),
+    PM10_scaled = (PM10.num - min(PM10.num)) / (max(PM10.num) - min(PM10.num)),
+    PM25_scaled = (PM25.num - min(PM25.num)) / (max(PM25.num) - min(PM25.num)),
+    SO2_scaled = (SO2.num - min(SO2.num)) / (max(SO2.num) - min(SO2.num))
+  )
+
+# Crear un gráfico de puntos superpuestos con datos escalados y facet_wrap por año
+ggplot(data_scaled, aes(x = Fecha, color = "Compuesto")) +
+  geom_line(aes(y = NO2_scaled, color = "NO2"), size = 2, alpha = 0.7) +
+  geom_line(aes(y = O3_scaled, color = "O3"), size = 2, alpha = 0.7) +
+  geom_line(aes(y = PM10_scaled, color = "PM10"), size = 2, alpha = 0.7) +
+  geom_line(aes(y = PM25_scaled, color = "PM25"), size = 2, alpha = 0.7) +
+  geom_line(aes(y = SO2_scaled, color = "SO2"), size = 2, alpha = 0.7) +
+  labs(title = "Concentración de Compuestos Químicos a lo largo del tiempo (Escala min-max)",
+       x = "Años",
+       y = "Concentración") +
+  scale_color_manual(values = c("NO2" = "red", "O3" = "blue", "PM10" = "green", "PM25" = "purple", "SO2" = "orange")) +
+  theme_minimal() +
+  facet_wrap(~year, scales = "free_y", ncol = 4)
+
+```
+
+
+
+```{r eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
+library(tidyverse)
+library(ggplot2)
+
+# Convertir Fecha a formato de fecha
+data$Fecha <- as.Date(data$Fecha)
+
+# Aplicar la estandarización min-max a los datos por año
+data_scaled <- data %>%
+  mutate(
+    NO2_scaled = (NO2.num - min(NO2.num)) / (max(NO2.num) - min(NO2.num)),
+    O3_scaled = (O3.num - min(O3.num)) / (max(O3.num) - min(O3.num)),
+    PM10_scaled = (PM10.num - min(PM10.num)) / (max(PM10.num) - min(PM10.num)),
+    PM25_scaled = (PM25.num - min(PM25.num)) / (max(PM25.num) - min(PM25.num)),
+    SO2_scaled = (SO2.num - min(SO2.num)) / (max(SO2.num) - min(SO2.num))
+  )
+
+# Crear un gráfico de líneas superpuestas con datos escalados y suavizado por media mensual
+ggplot(data_scaled, aes(x = Fecha, color = "Compuesto")) +
+  geom_line(aes(y = NO2_scaled), alpha = 0.5, size = 1) +
+  geom_line(aes(y = O3_scaled), alpha = 0.5, size = 1) +
+  geom_line(aes(y = PM10_scaled), alpha = 0.5, size = 1) +
+  geom_line(aes(y = PM25_scaled), alpha = 0.5, size = 1) +
+  geom_line(aes(y = SO2_scaled), alpha = 0.5, size = 1) +
+  geom_smooth(aes(y = NO2_scaled), method = "loess", se = FALSE, color = "red") +
+  geom_smooth(aes(y = O3_scaled), method = "loess", se = FALSE, color = "blue") +
+  geom_smooth(aes(y = PM10_scaled), method = "loess", se = FALSE, color = "green") +
+  geom_smooth(aes(y = PM25_scaled), method = "loess", se = FALSE, color = "purple") +
+  geom_smooth(aes(y = SO2_scaled), method = "loess", se = FALSE, color = "orange") +
+  labs(title = "Concentración de Compuestos Químicos a lo largo del tiempo (Escala min-max)",
+       x = "Fecha",
+       y = "Concentración") +
+  scale_color_manual(values = c("NO2" = "red", "O3" = "blue", "PM10" = "green", "PM25" = "purple", "SO2" = "orange")) +
+  theme_minimal()
+
+
+```
+
+
+
+```{r eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
+library(tidyverse)
+library(ggplot2)
+
+# Cargar tus datos
+# Por ejemplo, asumiendo que tus datos se llaman "data"
+# data <- read.csv("tu_archivo.csv")
+
+# Crear un gráfico de densidad superpuestas
+ggplot(data, aes(x = NO2.num, fill = "NO2")) +
+  geom_density(alpha = 0.5) +
+  geom_density(aes(x = O3.num, fill = "O3"), alpha = 0.5) +
+  geom_density(aes(x = PM10.num, fill = "PM10"), alpha = 0.5) +
+  geom_density(aes(x = PM25.num, fill = "PM25"), alpha = 0.5) +
+  geom_density(aes(x = SO2.num, fill = "SO2"), alpha = 0.5) +
+  labs(title = "Densidad de Compuestos Químicos",
+       x = "Concentración",
+       y = "Densidad") +
+  scale_fill_manual(values = c("NO2" = "red", "O3" = "blue", "PM10" = "green", "PM25" = "purple", "SO2" = "orange")) +
+  theme_minimal()
+
+```
+
+
+```{r eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
+# Tendencia temporal de NO2.num
+ggplot(data, aes(x =Fecha, y = NO2.num)) +
+  geom_line() +
+  labs(title = "Tendencia Temporal de NO2.num", x = "Fecha", y = "Valor")
+
+```
+
+ Y observandose en la siguiente gráfica que el ICA predominante es razonablemente bueno.
+ 
+ 
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# Cargar biblioteca ggplot2
+library(ggplot2)
+
+# Crear un gráfico de barras apiladas con etiquetas del eje x rotadas
+ggplot(data, aes(x = ICA, fill = N_PROVINCIA)) +
+  geom_bar(position = "stack") +
+  labs(title = "Frecuencias de Categorías", x = "Tipo de Área") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+
+
+```
+
+
+
+
+```{r eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
+# Cargar bibliotecas necesarias
+library(ggplot2)
+
+# Crear una columna 'variable' con los nombres de las variables
+data$variable <- rep(c("NO2", "O3", "PM10", "PM25", "SO2"), length.out = nrow(data))
+
+# Crear un gráfico de barras con facet_wrap
+ggplot(data, aes(x = N_PROVINCIA, fill = variable)) +
+  geom_bar(position = "dodge", stat = "count") +
+  labs(title = "Relación entre Elementos Químicos y Provincias", x = "Provincia", y = "Frecuencia") +
+  scale_fill_manual(values = c("NO2" = "red", "O3" = "blue", "PM10" = "green", "PM25" = "purple", "SO2" = "orange")) +
+  facet_wrap(~variable, scales = "free_y", ncol = 1) +
+  theme_minimal()
+
+
+```
+
+
+```{r eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
+library(zoo)
+data$Fecha <- as.Date(data$Fecha)
+(data.zoo <- zoo(data[, -c(1:3, 13:15)], order.by = data$Fecha))
+
+```
+
+
+## Relacion entre variables.
+
+Para realizar el análisis bivariante primer observaremos como se relacionan todas las variables entre sí
+
+Primero vamos a realizar un `ggpairs` y un `ggcorr`para relacionar todos los elementos químicos con todos (valores numéricos)
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+library(GGally)
+num_cols <- c("NO2.num", "O3.num", "PM10.num", "PM25.num", "SO2.num")
+ggpairs(df[num_cols])
+```
+
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, fig.height = 2.5, fig.width = 4, fig.align = "center"}
+ggcorr(df[num_cols])
+```
+Como podemos ver, la relación de las variables no es clara. De forma general podemos decir que las variables son bastante independientes entre sí.Como excepción podríamos hablar de las variables PM10 y PM25
+
+Ahora mostraremos las matrices de covaraianza y correlación con Pearson y Spearman
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+Cov_Mat <- cov(df[num_cols])
+
+print("Matriz de covarianza")
+print(Cov_Mat)
+
+```
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+Cor_Mat_S <- cor(df[num_cols], method = "spearman")
+Cor_Mat_P <- cor(df[num_cols], method = "pearson")
+
+print("Matriz de correlacion (Spearman)")
+print(Cor_Mat_S)
+print("Matriz de correlacion (Pearson)")
+print(Cor_Mat_P)
+
+```
+
+Ya que hemos visto que las variables PM10 y PM25 parece que tengan alguna relación no lineal, vamos a relacionar sus equivalentes categóricas.
+
+```{r}
+library(corrplot)
+ggcorr(df%>%mutate(across(c(ends_with('.cat')), as.integer))%>%mutate(ICA=as.integer(ICA))%>%mutate(TIPO_AREA=as.integer(TIPO_AREA))%>%select(c('TIPO_AREA','NO2.cat','PM25.cat','ICA','PM10.cat','O3.cat')))
+
+```
+
+Donde se observa claramente una posible relación entre el ICA y las partículas en suspensión, y entre las propias particulas en suspensión, eso es debido al efecto del clima, como los vientos, que afectan mucho a estos parámetros, aunque realmente estarían relacionados con esas variables climáticas. 
+
+Si estudiamos que compuesto afecta más a el indice global de ICA, que recordemos es el peor de todos los índices, hay una grab probabilidad de que el resultado sean las partículas en suspensión.
+
+```{r}
+g <- ggplot(df, aes(component))
+g + geom_bar(aes(fill = ICA))+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))+ 
+  ggtitle("Influencia de cada Componente en la ICA diaria")
+
+```
+Observándose como los único componentes que consiguen alcanzar los peores ICA son las párticulas en suspensión.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+library(ggpubr)
+# Gráfico de barras agrupadas para la variable TIPO_AREA y NO2.num
+p1<-ggplot(df, aes(x = TIPO_AREA, y = O3.num, fill = TIPO_AREA)) +
+  geom_bar(stat = "summary", fun = "mean", position = "dodge") +
+  labs(title = "Promedio de Ozono por TIPO_AREA", x = "TIPO_AREA", y = "Promedio Ozono")+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))+ 
+  ggtitle("Presencia de Ozono por Estacion")+ylim(c(0, 200))
+p2<-ggplot(df, aes(x = TIPO_AREA, y = NO2.num, fill = TIPO_AREA)) +
+  geom_bar(stat = "summary", fun = "mean", position = "dodge") +
+  labs(title = "Promedio de NO2 por TIPO_AREA", x = "TIPO_AREA", y = "Promedio NO2.num")+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))+ 
+  ggtitle("Presencia de Ozono por Estacion")+ylim(c(0, 200))
+
+ggarrange(p1, p2, 
+          ncol = 2)
+
+```
+
+Como ya se adelantó en el análisis, dentro de las variables si que existe una relación entre la zona en la que se encuentran y las emisisónes, aquí se puede comprobar como el NO2 es mas frecuente en zonas urbanas que en las rurales, mientras que el Ozono practicamente no varía, ya que depende de los datos climáticos.
+
+
+```{r eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
+# Mapa de calor de la matriz de correlación
+cor_matrix <- cor(df[, c("NO2.num", "O3.num", "PM10.num", "PM25.num", "SO2.num")])
+heatmap(cor_matrix, col = colorRampPalette(c("blue", "white", "red"))(50), 
+        main = "Mapa de Calor de Correlación")
+
+```
+
+
+```{r eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
+# Gráfico de líneas para NO2.num y O3.num a lo largo del tiempo
+ggplot(df, aes(x = Fecha)) +
+  geom_line(aes(y = NO2.num, color = "NO2")) +
+  geom_line(aes(y = O3.num, color = "O3")) +
+  labs(title = "Evolución de NO2.num y O3.num a lo largo del tiempo", x = "Fecha", y = "Concentración") +
+  scale_color_manual(values = c("NO2" = "red", "O3" = "blue"))
+
+```
+
+
+```{r eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
+# Boxplot para comparar la distribución de NO2.num en diferentes estaciones
+ggplot(df, aes(x = year, y = NO2.num, fill = ESTACION)) +
+  geom_boxplot() +
+  labs(title = "Distribución de NO2.num por Estación", x = "Estación", y = "NO2.num")
+
+```
+
+
+```{r eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
+# Cargar datos geoespaciales de países (usaremos 'world' en lugar de 'ne_countries')
+world <- ne_download(scale = 110, returnclass = "sf")
+
+# Crear un objeto sf con las coordenadas de tu conjunto de datos
+data_sf <- st_as_sf(data, coords = c("X_UTM30N", "Y_UTM30N"), crs = st_crs(world))
+
+# Crear el mapa
+ggplot() +
+  geom_sf(data = world) +
+  geom_sf(data = data_sf, color = "red", size = 2) +
+  labs(title = "Ubicación de las coordenadas en España") +
+  theme_minimal()
+```
+
+
+```{r eval=FALSE, message=TRUE, warning=TRUE, include=FALSE}
+mosaicplot(table(df$ICA, df$TIPO_AREA), main = "Mosaic Plot of ICA and TIPO_AREA", las = 3, color = c("red", "green", "blue"))
+
+```
+
+```{r echo=FALSE, fig.height=2, fig.width=2, message=FALSE, warning=FALSE}
+moda <- function(x) {
+   a <- unique(x)
+   a[which.max(tabulate(match(x, a)))]
+}
+
+data_scaled<-df
+data_scaled$mensual<-format(as.Date(df$Fecha, formato ="%Y-%m-%d"),"%Y-%m")
+data_scaled$mensual<-ym(data_scaled$mensual)
+#data_scaled$mensual<-year(data_scaled$mensual)
+data_scaled <- data_scaled %>%
+  group_by(N_PROVINCIA,mensual,TIPO_AREA)%>%
+  summarise(NO2.num=max(NO2.num),
+    O3.num=max(O3.num), 
+    PM10.num=max(PM10.num),
+    PM25.num=max(PM25.num), 
+    SO2.num=max(SO2.num),
+    ICA.num=moda(ICA))%>%
+  mutate(
+    NO2_scaled = (NO2.num - min(NO2.num)) / (max(NO2.num) - min(NO2.num)),
+    O3_scaled = (O3.num - min(O3.num)) / (max(O3.num) - min(O3.num)),
+    PM10_scaled = (PM10.num - min(PM10.num)) / (max(PM10.num) - min(PM10.num)),
+    PM25_scaled = (PM25.num - min(PM25.num)) / (max(PM25.num) - min(PM25.num)),
+    SO2_scaled = (SO2.num - min(SO2.num)) / (max(SO2.num) - min(SO2.num))
+  )
+```
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+library(ggplot2)
+ggplot(data = data_scaled, mapping = aes(x = TIPO_AREA, y = NO2.num,fill=ICA.num)) + geom_boxplot(outlier.shape=NA) +facet_wrap(~N_PROVINCIA)+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))+ 
+  ggtitle("Presencia de máximo nivel de NO2 anual por Estacion")+ylim(c(0, 200))
+
+
+
+```
+Sin embargo si profundizamos un poco entre provicias, cabe destacar las zonas rurales de Alicante, con un nivel de NO2 muy por debajo del resto de comarcas.
+
+# Conclusiones 
+
+Durante el trabajo hemos analizado la calidad del aire durante un periodo de 5 años (2018 - 2022) de las que se han sacado las siguientes conclusiones:
+
+* Existe una fuerte correlación entre el ICA global y los componentes a los que les afectan las condiciones climáticas, por lo que variables climáticas en este dataset proporcionarían información extra.
+
+
+* Aparentemente la calidad del aire diaria se ha mostrado estable a lo largo de estos años, observandose un pico durante el periodo de COVID en el que los compuestos producidos por el hombre han tenido un repunte a la baja, aunque el resto de componentes se mantenían, por lo que la influencia general no ha sido excesivamente notable. 
+

@@ -47,7 +47,7 @@ En la que cada observación corresponde a la medición de las diferentes estacio
 
 Una vez cargados los dataset, se unen entre ellos para obtener un conjunto de datos en el que las variables estan repartidas en cada columna:
 
-```{r, echo=FALSE, message=FALSE, warning=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 
 library(tidyr)
 library(dplyr)
@@ -482,6 +482,16 @@ summary(data)
 
 ```
 
+
+
+|                  | Fecha       | $NO_{2}$ | $O_{3}$ | PM10   | PM25   | $SO_{2}$ |
+|------------------|-------------|----------|---------|--------|--------|----------|
+| *Mínimo*       | 2018-01-01  | 1.00     | 1.00    | 1.00   | 0.00   | 1.00     |
+| *Q1*           | 2019-04-07  | 9.00     | 74.00   | 12.00  | 7.00   | 3.00     |
+| *Mediana*      | 2020-07-06  | 21.00    | 88.00   | 22.00  | 12.00  | 4.00     |
+| *Media*        | 2020-07-04  | 27.91    | 88.60   | 29.34  | 15.42  | 6.359    |
+| *Q3*           | 2021-10-04  | 41.00    | 103.00  | 37.00  | 19.00  | 6.00     |
+| *Máximo*       | 2022-12-31  | 229.00   | 207.00  | 757.00 | 296.00 | 239.00   |
 
 Una vez obtenidos los estadísticos. Visualizamos nuestras variables.
 
@@ -987,3 +997,7 @@ mosaicplot(table(df$ICA, df$TIPO_AREA), main = "Mosaic Plot of ICA and TIPO_AREA
 
 ```
 Con el mosaic plot podemos observar como a pesar de que la cantidad de días que el aire tiene una calidad buena no es muy diferente entre las zonas, en las zonas rurales hay menos días con calidades peores.
+
+# Conclusiones 
+
+Durante el trabajo hemos analizado la calidad del aire durante un periodo de 5 años (2018 - 2022). Hemos podio     

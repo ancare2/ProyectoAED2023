@@ -440,8 +440,6 @@ Como es ampliamente conocido, un "outlier" se define como un valor atípico en u
 
 ```{r, echo=FALSE, message=FALSE, warning=FALSE}
 # Método 3-Sigma
-
-library(readr)
 df <- read_csv("../data/join_datas.csv") #Hemos guardado el csv con el formato tidy para cargarlo automáticamente y no tener que estas procesando todos los pasos anteriores
 
 find_outliers_3sigma <- function(x) {
@@ -531,9 +529,6 @@ outliers_summary <- data.frame(Chemical_Element = rep(columnas_analizar, each = 
                                   sapply(outliers_hampel_list, function(x) length(x$values)),
                                   sapply(outliers_percentile_list, function(x) length(x$values))
                                 ))
-
-print(outliers_summary)
-
 ```
 
 

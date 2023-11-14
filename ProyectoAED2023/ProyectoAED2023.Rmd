@@ -647,8 +647,16 @@ guía la tabla del codebook que venía con los datos.
 El código empleado se ha repetido para cada variable, ya que cada una tiene un intervalo distnto. El código 
 es el siguiente, que en este caso representa el paso a categórica del SO2 en función de los intervalos:
 
+
+
 ```{r}
-x <- imputed_datas$SO2.num
+
+library(readr)
+path <- ("../data/imputed_datas.csv")
+df <- read_csv(path)
+list.files()
+
+x <- df$SO2.num
 y <- character(length = length(x))
 
 for (i in 1:length(x)) {
@@ -1181,7 +1189,7 @@ Vamos a mostrar ahora un histograma de la cantidad de días en los cuales ha hab
 índices de la calidad del aire. Para calcular esto debemos coger todas las mediciones de un mismo día y quedarnos 
 con la peor, y esta es la calidad de aire para ese día.
 
-```{r echo=FALSE, message=TRUE, warning=TRUE, fig.height = 3.5, fig.width = 7, fig.align = "center"}
+```{r echo=FALSE, message=TRUE, warning=TRUE, fig.height = 3.3, fig.width = 7, fig.align = "center"}
 
 
 ggplot(df, aes(x = ICA, fill = ICA)) +

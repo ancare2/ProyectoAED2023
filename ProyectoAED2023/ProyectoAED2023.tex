@@ -599,34 +599,6 @@ Aquí utilizamos los códigos implementados anteriormente en cada una de
 las variables numéricas para detectar los outliers
 
 \begin{verbatim}
-##    Chemical_Element    Method Outliers_Count
-## 1           NO2.num   3-Sigma            803
-## 2           NO2.num       IQR           1789
-## 3           NO2.num    Hampel            301
-## 4           NO2.num Percentil            709
-## 5           NOx.num   3-Sigma            725
-## 6           NOx.num       IQR           1379
-## 7           NOx.num    Hampel           1658
-## 8           NOx.num Percentil           6215
-## 9            O3.num   3-Sigma            789
-## 10           O3.num       IQR           2191
-## 11           O3.num    Hampel           2169
-## 12           O3.num Percentil           7247
-## 13         PM10.num   3-Sigma           1750
-## 14         PM10.num       IQR           8298
-## 15         PM10.num    Hampel            353
-## 16         PM10.num Percentil           2435
-## 17         PM25.num   3-Sigma           2336
-## 18         PM25.num       IQR          10336
-## 19         PM25.num    Hampel           6661
-## 20         PM25.num Percentil           6048
-## 21          SO2.num   3-Sigma           8916
-## 22          SO2.num       IQR           3644
-## 23          SO2.num    Hampel           3496
-## 24          SO2.num Percentil           3768
-\end{verbatim}
-
-\begin{verbatim}
 ## # A tibble: 6 x 5
 ##   Chemical_Element `3-Sigma`   IQR Hampel Percentil
 ##   <chr>                <int> <int>  <int>     <int>
@@ -750,24 +722,24 @@ resultados para el conjunto de test:
 ## 
 ## Residuals:
 ##      Min       1Q   Median       3Q      Max 
-## -299.857   -1.785   -0.898    0.571   89.250 
+## -300.316   -1.748   -0.896    0.560   89.341 
 ## 
 ## Coefficients:
 ##              Estimate Std. Error t value Pr(>|t|)    
-## (Intercept)  1.857341   0.042225   43.99   <2e-16 ***
-## NOx.num      0.972210   0.001436  676.94   <2e-16 ***
-## NO.num      -1.436337   0.002939 -488.78   <2e-16 ***
+## (Intercept)  1.810047   0.042584   42.51   <2e-16 ***
+## NOx.num      0.973668   0.001452  670.76   <2e-16 ***
+## NO.num      -1.438813   0.002968 -484.70   <2e-16 ***
 ## ---
 ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ## 
-## Residual standard error: 5.205 on 40648 degrees of freedom
-##   (6786 observations deleted due to missingness)
-## Multiple R-squared:  0.9574, Adjusted R-squared:  0.9574 
-## F-statistic: 4.573e+05 on 2 and 40648 DF,  p-value: < 2.2e-16
+## Residual standard error: 5.236 on 40405 degrees of freedom
+##   (6670 observations deleted due to missingness)
+## Multiple R-squared:  0.9569, Adjusted R-squared:  0.9568 
+## F-statistic: 4.48e+05 on 2 and 40405 DF,  p-value: < 2.2e-16
 \end{verbatim}
 
 \begin{verbatim}
-## RMSE con el conjunto de test=  4.935691
+## RMSE con el conjunto de test=  4.807143
 \end{verbatim}
 
 \includegraphics{ProyectoAED2023_files/figure-latex/unnamed-chunk-14-1.pdf}
@@ -786,10 +758,83 @@ Para finalizar se imputan el resto de datos faltantes por proximidad
 geográfica y temporal y se eliminan las variables que no necesitamos
 para el cálculo del ICA.
 
-\hypertarget{calculo-ica.aquuxed-se-debe-meter-el-cuxf3digo-para-calcular-el-ica-de-cada-variable}{%
-\subsection{Calculo ICA.Aquí se debe meter el código para calcular el
-ICA de cada
-variable}\label{calculo-ica.aquuxed-se-debe-meter-el-cuxf3digo-para-calcular-el-ica-de-cada-variable}}
+Una vez tenemos imputados los datos vamos a agregar columnas adicionales
+que representan de forma categórica el nivel de cada elemento desde
+``Buena'' hasta ``Extremadamente desfavorable''. Para ello se ha
+utilizado como guía la tabla del codebook que venía con los datos.
+
+El código empleado se ha repetido para cada variable, ya que cada una
+tiene un intervalo distnto. El código es el siguiente, que en este caso
+representa el paso a categórica del SO2 en función de los intervalos:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(readr)}
+\NormalTok{path }\OtherTok{\textless{}{-}}\NormalTok{ (}\StringTok{"../data/imputed\_datas.csv"}\NormalTok{)}
+\NormalTok{df }\OtherTok{\textless{}{-}} \FunctionTok{read\_csv}\NormalTok{(path)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## New names:
+## * `` -> `...1`
+\end{verbatim}
+
+\begin{verbatim}
+## Warning: One or more parsing issues, call `problems()` on your data frame for details,
+## e.g.:
+##   dat <- vroom(...)
+##   problems(dat)
+\end{verbatim}
+
+\begin{verbatim}
+## Rows: 98422 Columns: 15
+## -- Column specification --------------------------------------------------------
+## Delimiter: ","
+## chr   (4): N_PROVINCIA, N_MUNICIPIO, TIPO_AREA, geometry
+## dbl  (10): ...1, ESTACION, NO2.num, O3.num, PM10.num, PM25.num, SO2.num, Dia...
+## date  (1): Fecha
+## 
+## i Use `spec()` to retrieve the full column specification for this data.
+## i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{list.files}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] "appendix.tex"          "Definitions"           "mybibfile.bib"        
+## [4] "ProyectoAED2023.log"   "ProyectoAED2023.pdf"   "ProyectoAED2023.Rmd"  
+## [7] "ProyectoAED2023.tex"   "ProyectoAED2023_files"
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{x }\OtherTok{\textless{}{-}}\NormalTok{ df}\SpecialCharTok{$}\NormalTok{SO2.num}
+\NormalTok{y }\OtherTok{\textless{}{-}} \FunctionTok{character}\NormalTok{(}\AttributeTok{length =} \FunctionTok{length}\NormalTok{(x))}
+
+\ControlFlowTok{for}\NormalTok{ (i }\ControlFlowTok{in} \DecValTok{1}\SpecialCharTok{:}\FunctionTok{length}\NormalTok{(x)) \{}
+  \ControlFlowTok{if}\NormalTok{ (x[i] }\SpecialCharTok{\textgreater{}=} \DecValTok{0} \SpecialCharTok{\&}\NormalTok{ x[i] }\SpecialCharTok{\textless{}=} \DecValTok{100}\NormalTok{) \{}
+\NormalTok{    y[i] }\OtherTok{\textless{}{-}} \StringTok{"Buena"}
+\NormalTok{  \} }\ControlFlowTok{else} \ControlFlowTok{if}\NormalTok{ (x[i] }\SpecialCharTok{\textgreater{}=} \DecValTok{101} \SpecialCharTok{\&}\NormalTok{ x[i] }\SpecialCharTok{\textless{}=} \DecValTok{200}\NormalTok{) \{}
+\NormalTok{    y[i] }\OtherTok{\textless{}{-}} \StringTok{"Razonablemente Buena"}
+\NormalTok{  \} }\ControlFlowTok{else} \ControlFlowTok{if}\NormalTok{ (x[i] }\SpecialCharTok{\textgreater{}=} \DecValTok{201} \SpecialCharTok{\&}\NormalTok{ x[i] }\SpecialCharTok{\textless{}=} \DecValTok{350}\NormalTok{) \{}
+\NormalTok{    y[i] }\OtherTok{\textless{}{-}} \StringTok{"Regular"}
+\NormalTok{  \} }\ControlFlowTok{else} \ControlFlowTok{if}\NormalTok{ (x[i] }\SpecialCharTok{\textgreater{}=} \DecValTok{351} \SpecialCharTok{\&}\NormalTok{ x[i] }\SpecialCharTok{\textless{}=} \DecValTok{500}\NormalTok{) \{}
+\NormalTok{    y[i] }\OtherTok{\textless{}{-}} \StringTok{"Desfavorable"}
+\NormalTok{  \} }\ControlFlowTok{else} \ControlFlowTok{if}\NormalTok{ (x[i] }\SpecialCharTok{\textgreater{}=} \DecValTok{501} \SpecialCharTok{\&}\NormalTok{ x[i] }\SpecialCharTok{\textless{}=} \DecValTok{750}\NormalTok{) \{}
+\NormalTok{    y[i] }\OtherTok{\textless{}{-}} \StringTok{"Muy desfavorable"}
+\NormalTok{  \} }\ControlFlowTok{else} \ControlFlowTok{if}\NormalTok{ (x[i] }\SpecialCharTok{\textgreater{}=} \DecValTok{751} \SpecialCharTok{\&}\NormalTok{ x[i] }\SpecialCharTok{\textless{}=} \DecValTok{1250}\NormalTok{) \{}
+\NormalTok{    y[i] }\OtherTok{\textless{}{-}} \StringTok{"Extremadamente desfavorable"}
+\NormalTok{  \}}
+\NormalTok{\}}
+
+\NormalTok{df}\SpecialCharTok{$}\NormalTok{SO2.cat }\OtherTok{\textless{}{-}}\NormalTok{ y}
+\end{Highlighting}
+\end{Shaded}
 
 Una vez se obtiene el valor categórico de cada variable, se establece el
 Indice global diario como el peor de los individuales.
@@ -889,7 +934,7 @@ resumen estadístico
 
 Una vez obtenidos los estadísticos. Visualizamos nuestras variables.
 
-\includegraphics{ProyectoAED2023_files/figure-latex/unnamed-chunk-20-1.pdf}
+\includegraphics{ProyectoAED2023_files/figure-latex/unnamed-chunk-21-1.pdf}
 
 La representación gráfica previa proporciona una visión general de la
 concentración de cada elemento en nuestro conjunto de datos. La
@@ -916,28 +961,23 @@ A continuación, procederemos a visualizar la evolución de los compuestos
 químicos a lo largo del tiempo, con el objetivo de realizar un análisis
 más exhaustivo sobre la calidad del aire.
 
-\includegraphics{ProyectoAED2023_files/figure-latex/unnamed-chunk-21-1.pdf}
-\includegraphics{ProyectoAED2023_files/figure-latex/unnamed-chunk-21-2.pdf}
-\includegraphics{ProyectoAED2023_files/figure-latex/unnamed-chunk-21-3.pdf}
-\includegraphics{ProyectoAED2023_files/figure-latex/unnamed-chunk-21-4.pdf}
-\includegraphics{ProyectoAED2023_files/figure-latex/unnamed-chunk-21-5.pdf}
-\includegraphics{ProyectoAED2023_files/figure-latex/unnamed-chunk-21-6.pdf}
-
 \includegraphics{ProyectoAED2023_files/figure-latex/unnamed-chunk-22-1.pdf}
 
 \includegraphics{ProyectoAED2023_files/figure-latex/unnamed-chunk-23-1.pdf}
 
 \includegraphics{ProyectoAED2023_files/figure-latex/unnamed-chunk-24-1.pdf}
 
-\includegraphics{ProyectoAED2023_files/figure-latex/unnamed-chunk-26-1.pdf}
+\includegraphics{ProyectoAED2023_files/figure-latex/unnamed-chunk-25-1.pdf}
 
 \includegraphics{ProyectoAED2023_files/figure-latex/unnamed-chunk-27-1.pdf}
 
-Pensar que hacer con los nombres
-
 \includegraphics{ProyectoAED2023_files/figure-latex/unnamed-chunk-28-1.pdf}
 
+Pensar que hacer con los nombres
+
 \includegraphics{ProyectoAED2023_files/figure-latex/unnamed-chunk-29-1.pdf}
+
+\includegraphics{ProyectoAED2023_files/figure-latex/unnamed-chunk-30-1.pdf}
 
 \hypertarget{anuxe1lisis-bivariante}{%
 \section{Análisis Bivariante}\label{anuxe1lisis-bivariante}}
@@ -948,9 +988,10 @@ relacionan todas las variables entre sí
 Primero vamos a realizar un \texttt{ggpairs} y un \texttt{ggcorr}para
 relacionar todos los elementos químicos con todos (valores numéricos)
 
-\includegraphics{ProyectoAED2023_files/figure-latex/unnamed-chunk-31-1.pdf}
-
 \includegraphics{ProyectoAED2023_files/figure-latex/unnamed-chunk-32-1.pdf}
+
+\begin{center}\includegraphics{ProyectoAED2023_files/figure-latex/unnamed-chunk-33-1} \end{center}
+
 Como podemos ver, la relación de las variables no es clara. De forma
 general podemos decir que las variables son bastante independientes
 entre sí.Como excepción podríamos hablar de las variables PM10 y PM25
@@ -1025,7 +1066,7 @@ ellas
 \hypertarget{no2}{%
 \subsection{NO2}\label{no2}}
 
-\includegraphics{ProyectoAED2023_files/figure-latex/unnamed-chunk-36-1.pdf}
+\begin{center}\includegraphics{ProyectoAED2023_files/figure-latex/unnamed-chunk-37-1} \end{center}
 
 \begin{verbatim}
 ##             NO2.num      O3.num    PM10.num    PM25.num     SO2.num
@@ -1036,23 +1077,23 @@ ellas
 ## SO2.num   0.2437866 -0.04530027  0.04820309  0.04884036  1.00000000
 \end{verbatim}
 
-\includegraphics{ProyectoAED2023_files/figure-latex/unnamed-chunk-38-1.pdf}
-
 \includegraphics{ProyectoAED2023_files/figure-latex/unnamed-chunk-39-1.pdf}
 
 \includegraphics{ProyectoAED2023_files/figure-latex/unnamed-chunk-40-1.pdf}
+
+\includegraphics{ProyectoAED2023_files/figure-latex/unnamed-chunk-41-1.pdf}
 
 Vamos a mostrar ahora un histograma de la cantidad de días en los cuales
 ha habido cada uno de los diferentes índices de la calidad del aire.
 Para calcular esto debemos coger todas las mediciones de un mismo día y
 quedarnos con la peor, y esta es la calidad de aire para ese día.
 
-\includegraphics{ProyectoAED2023_files/figure-latex/unnamed-chunk-43-1.pdf}
+\begin{center}\includegraphics{ProyectoAED2023_files/figure-latex/unnamed-chunk-44-1} \end{center}
 
 Vamos ahora a probar, por ejemplo, a sacar la misma gráfica usando solo
 los datos de la provincia de València
 
-\includegraphics{ProyectoAED2023_files/figure-latex/unnamed-chunk-44-1.pdf}
+\includegraphics{ProyectoAED2023_files/figure-latex/unnamed-chunk-45-1.pdf}
 
 Podemos observar que la distribución de los datos parece mantenerse en
 ambos casos. Hay pocos días donde la calidad del aire sea buena. Por
@@ -1060,7 +1101,7 @@ otro lado el parámetro más frecuente es el de razonablemente buena, a
 partir del cual los sucesivos van bajando hasta llegar a extremadamente
 desfavorable.
 
-\includegraphics{ProyectoAED2023_files/figure-latex/unnamed-chunk-45-1.pdf}
+\includegraphics{ProyectoAED2023_files/figure-latex/unnamed-chunk-46-1.pdf}
 Con el mosaic plot podemos observar como a pesar de que la cantidad de
 días que el aire tiene una calidad buena no es muy diferente entre las
 zonas, en las zonas rurales hay menos días con calidades peores.

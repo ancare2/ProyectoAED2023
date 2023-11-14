@@ -640,8 +640,35 @@ df<-df %>% select(-no_valids_var)
 ```
 
 
-## Calculo ICA.Aquí se debe meter el código para calcular el ICA de cada variable
+Una vez tenemos imputados los datos vamos a agregar columnas adicionales que representan de forma categórica
+el nivel de cada elemento desde "Buena" hasta "Extremadamente desfavorable". Para ello se ha utilizado como
+guía la tabla del codebook que venía con los datos.
 
+El código empleado se ha repetido para cada variable, ya que cada una tiene un intervalo distnto. El código 
+es el siguiente, que en este caso representa el paso a categórica del SO2 en función de los intervalos:
+
+```{r}
+x <- imputed_datas$SO2.num
+y <- character(length = length(x))
+
+for (i in 1:length(x)) {
+  if (x[i] >= 0 & x[i] <= 100) {
+    y[i] <- "Buena"
+  } else if (x[i] >= 101 & x[i] <= 200) {
+    y[i] <- "Razonablemente Buena"
+  } else if (x[i] >= 201 & x[i] <= 350) {
+    y[i] <- "Regular"
+  } else if (x[i] >= 351 & x[i] <= 500) {
+    y[i] <- "Desfavorable"
+  } else if (x[i] >= 501 & x[i] <= 750) {
+    y[i] <- "Muy desfavorable"
+  } else if (x[i] >= 751 & x[i] <= 1250) {
+    y[i] <- "Extremadamente desfavorable"
+  }
+}
+
+df$SO2.cat <- y
+```
 
 
  
@@ -754,31 +781,33 @@ A continuación, procederemos a visualizar la evolución de los compuestos quím
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 library(ggplot2)
+library(devtools)
+library(ggpubr)
 
+par(mfrow = c(2,3))
 # Crear gráficos de densidad
-ggplot(data, aes(x = NO2.num, fill = "NO2")) +
+p1 <- ggplot(data, aes(x = NO2.num, fill = "NO2")) +
   geom_density(alpha = 0.5) +
   labs(title = "Densidad de NO2", x = "Concentración de NO2")
 
-ggplot(data, aes(x = O3.num, fill = "O3")) +
+p2 <- ggplot(data, aes(x = O3.num, fill = "O3")) +
   geom_density(alpha = 0.5) +
   labs(title = "Densidad de O3", x = "Concentración de O3")
 
-ggplot(data, aes(x = PM10.num, fill = "PM10")) +
+p3 <- ggplot(data, aes(x = PM10.num, fill = "PM10")) +
   geom_density(alpha = 0.5) +
   labs(title = "Densidad de PM10", x = "Concentración de PM10")
 
-ggplot(data, aes(x = PM25.num, fill = "PM2.5")) +
+p4 <- ggplot(data, aes(x = PM25.num, fill = "PM2.5")) +
   geom_density(alpha = 0.5) +
   labs(title = "Densidad de PM2.5", x = "Concentración de PM2.5")
 
-ggplot(data, aes(x = SO2.num, fill = "SO2")) +
+p5 <- ggplot(data, aes(x = SO2.num, fill = "SO2")) +
   geom_density(alpha = 0.5) +
   labs(title = "Densidad de SO2", x = "Concentración de SO2")
 
-ggplot(data, aes(x = Dias)) +
-  geom_density(alpha = 0.5) +
-  labs(title = "Densidad de Días", x = "Número de Días")
+ggarrange(p1, p2, p3, p4, p5, 
+          ncol = 2, nrow = 3)
 
 ```
 
@@ -810,7 +839,7 @@ ggplot(data_scaled, aes(x = Fecha, color = "Compuesto")) +
        y = "Concentración") +
   scale_color_manual(values = c("NO2" = "red", "O3" = "blue", "PM10" = "green", "PM25" = "purple", "SO2" = "orange")) +
   theme_minimal() +
-  facet_wrap(~year, scales = "free_y", ncol = 4)
+  facet_wrap(~year, scales = "free_y", ncol = 2)
 
 
 
@@ -852,7 +881,7 @@ ggplot(data_scaled, aes(x = Fecha, color = "Compuesto")) +
        y = "Concentración") +
   scale_color_manual(values = c("NO2" = "red", "O3" = "blue", "PM10" = "green", "PM25" = "purple", "SO2" = "orange")) +
   theme_minimal() +
-  facet_wrap(~year, scales = "free_y", ncol = 4)
+  facet_wrap(~year, scales = "free_y", ncol = 2)
 
 ```
 
@@ -1016,12 +1045,6 @@ data$Fecha <- as.Date(data$Fecha)
 
 
 
-
-
-
-
-
-
 # Análisis Bivariante
 
 Para realizar el análisis bivariante primer observaremos como se relacionan todas las variables entre sí
@@ -1038,7 +1061,7 @@ ggpairs(df[num_cols])
 
  
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE, fig.height = 2.5, fig.width = 4, fig.align = "center"}
 ggcorr(df[num_cols])
 ```
 Como podemos ver, la relación de las variables no es clara. De forma general podemos decir que las variables
@@ -1083,7 +1106,7 @@ Este efecto es más grande en las categóricas, ya que "medimos" por intervalos.
 
 ## NO2
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE,  fig.height = 2, fig.width = 4, fig.align = "center"}
 # Gráfico de dispersión entre NO2.num y O3.num
 ggplot(df, aes(x = NO2.num, y = O3.num)) +
   geom_point(color = "blue") +
@@ -1158,7 +1181,7 @@ Vamos a mostrar ahora un histograma de la cantidad de días en los cuales ha hab
 índices de la calidad del aire. Para calcular esto debemos coger todas las mediciones de un mismo día y quedarnos 
 con la peor, y esta es la calidad de aire para ese día.
 
-```{r echo=FALSE, message=TRUE, warning=TRUE}
+```{r echo=FALSE, message=TRUE, warning=TRUE, fig.height = 3.5, fig.width = 7, fig.align = "center"}
 
 
 ggplot(df, aes(x = ICA, fill = ICA)) +
@@ -1189,13 +1212,17 @@ Podemos observar que la distribución de los datos parece mantenerse en ambos ca
 del aire sea buena. Por otro lado el parámetro más frecuente es el de razonablemente buena, a partir del cual
 los sucesivos van bajando hasta llegar a extremadamente desfavorable.
 
-```{r echo=FALSE, message=TRUE, warning=TRUE}
+
+```{r echo=FALSE, message=TRUE, warning=TRUE, }
 mosaicplot(table(df$ICA, df$TIPO_AREA), main = "Mosaic Plot of ICA and TIPO_AREA", las = 3, color = c("red", "green", "blue"))
 
 ```
 Con el mosaic plot podemos observar como a pesar de que la cantidad de días que el aire tiene una calidad buena no es muy diferente entre las zonas, en las zonas rurales hay menos días con calidades peores.
 
 
+```{r}
+
+```
 
 
 

@@ -70,10 +70,10 @@
 
 %=================================================================
 % Full title of the paper (Capitalized)
-\Title{Full title of the paper (Capitalized)}
+\Title{Trabajo Análisis Exploratorio de Datos}
 
 % MDPI internal command: Title for citation in the left column
-\TitleCitation{Full title of the paper (Capitalized)}
+\TitleCitation{Trabajo Análisis Exploratorio de Datos}
 
 % Author Orchid ID: enter ID or remove command
 %\newcommand{\orcidauthorA}{0000-0000-0000-000X} % Add \orcidA{} behind the author's name
@@ -81,8 +81,8 @@
 
 
 % Authors, for the paper (add full first names)
-\Author{Luis Miguel Rioja
-Gallo$^{1,2,\ddagger,*}$\href{https://orcid.org/0000-0003-3293-2315}
+\Author{Luis Miguel Rioja Gallo, Anna Cabrerizo
+Requena$^{1,2,\ddagger,*}$\href{https://orcid.org/0000-0003-3293-2315}
 {\orcidicon}, John Doe$^{2, \dagger, \ddagger}$}
 
 
@@ -90,7 +90,7 @@ Gallo$^{1,2,\ddagger,*}$\href{https://orcid.org/0000-0003-3293-2315}
 
 
 % MDPI internal command: Authors, for metadata in PDF
-\AuthorNames{Luis Miguel Rioja Gallo, John Doe}
+\AuthorNames{Luis Miguel Rioja Gallo, Anna Cabrerizo Requena, John Doe}
 
 % MDPI internal command: Authors, for citation in the left column
 %\AuthorCitation{Lastname, F.; Lastname, F.; Lastname, F.}
@@ -99,10 +99,8 @@ Gallo$^{1,2,\ddagger,*}$\href{https://orcid.org/0000-0003-3293-2315}
 
 % Affiliations / Addresses (Add [1] after \address if there is only one affiliation.)
 \address{%
-$^{1}$ \quad Muenster University of Applied Sciences - Institute for
-Infrastructure, Water, Resources, Environment Correnstr. 25, 48149
-Muenster,
-Germany; \href{mailto:leutnant@fh-muenster.de}{\nolinkurl{leutnant@fh-muenster.de}}\\
+$^{1}$ \quad Universitat de València - Etse. Burjassot,
+València; \href{mailto:ancare2@alumne.uv.es}{\nolinkurl{ancare2@alumne.uv.es}}\\
 $^{2}$ \quad Your department Street, City,
 Country; \href{mailto:mail@mail.com}{\nolinkurl{mail@mail.com}}\\
 }
@@ -240,24 +238,39 @@ subject discipline.).}
 \providecommand{\tightlist}{%
   \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
 
+% From pandoc table feature
+\usepackage{longtable,booktabs,array}
+\usepackage{calc} % for calculating minipage widths
+% Correct order of tables after \paragraph or \subparagraph
+\usepackage{etoolbox}
+\makeatletter
+\patchcmd\longtable{\par}{\if@noskipsec\mbox{}\fi\par}{}{}
+\makeatother
+% Allow footnotes in longtable head/foot
+\IfFileExists{footnotehyper.sty}{\usepackage{footnotehyper}}{\usepackage{footnote}}
+\makesavenoteenv{longtable}
 
 
 \usepackage{longtable}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{multirow}
+\usepackage{wrapfig}
+\usepackage{float}
+\usepackage{colortbl}
+\usepackage{pdflscape}
+\usepackage{tabu}
+\usepackage{threeparttable}
+\usepackage{threeparttablex}
+\usepackage[normalem]{ulem}
+\usepackage{makecell}
+\usepackage{xcolor}
 
 \begin{document}
 
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-\hypertarget{version}{%
-\section{Version}\label{version}}
-
-This Rmd-skeleton uses the mdpi Latex template published 2023-03-25.
-However, the official template gets more frequently updated than the
-\textbf{rticles} package. Therefore, please make sure prior to paper
-submission, that you're using the most recent .cls, .tex and .bst files
-(available \href{http://www.mdpi.com/authors/latex}{here}).
 
 \hypertarget{article-header-information}{%
 \section{Article Header Information}\label{article-header-information}}
@@ -375,121 +388,705 @@ variables}\label{journal-specific-yaml-variables}}
 \begin{longtable}[t]{llllllll}
 \caption{\label{tab:mdpinames}MDPI journal names.}\\
 \toprule
-acoustics & biomedinformatics & dentistry & galaxies & jcp & metabolites & philosophies & socsci\\
-actuators & biomimetics & dermato & games & jcs & metals & photochem & software\\
-addictions & biomolecules & dermatopathology & gases & jcto & meteorology & photonics & soilsystems\\
-admsci & biophysica & designs & gastroent & jdb & methane & phycology & solar\\
-adolescents & biosensors & devices & gastrointestdisord & jeta & metrology & physchem & solids\\
-\addlinespace
-aerobiology & biotech & diabetology & gels & jfb & micro & physics & spectroscj\\
-aerospace & birds & diagnostics & genealogy & jfmk & microarrays & physiologia & sports\\
-agriculture & bloods & dietetics & genes & jimaging & microbiolres & plants & standards\\
-agriengineering & blsf & digital & geographies & jintelligence & micromachines & plasma & stats\\
-agrochemicals & brainsci & disabilities & geohazards & jlpea & microorganisms & platforms & std\\
-\addlinespace
-agronomy & breath & diseases & geomatics & jmmp & microplastics & pollutants & stresses\\
-ai & buildings & diversity & geosciences & jmp & minerals & polymers & surfaces\\
-air & businesses & dna & geotechnics & jmse & mining & polysaccharides & surgeries\\
-algorithms & cancers & drones & geriatrics & jne & modelling & poultry & suschem\\
-allergies & carbon & dynamics & grasses & jnt & molbank & powders & sustainability\\
-\addlinespace
-alloys & cardiogenetics & earth & gucdd & jof & molecules & preprints & symmetry\\
-analytica & catalysts & ebj & hazardousmatters & joitmc & mps & proceedings & synbio\\
-analytics & cells & ecologies & healthcare & jor & msf & processes & systems\\
-anatomia & ceramics & econometrics & hearts & journalmedia & mti & prosthesis & targets\\
-animals & challenges & economies & hemato & jox & muscles & proteomes & taxonomy\\
-\addlinespace
-antibiotics & chemengineering & education & hematolrep & jpm & nanoenergyadv & psf & technologies\\
-antibodies & chemistry & ejihpe & heritage & jrfm & nanomanufacturing & psych & telecom\\
-antioxidants & chemosensors & electricity & higheredu & jsan & nanomaterials & psychiatryint & test\\
-applbiosci & chemproc & electrochem & highthroughput & jtaer & ncrna & psychoactives & textiles\\
-appliedchem & children & electronicmat & histories & jvd & ndt & publications & thalassrep\\
-\addlinespace
-appliedmath & chips & electronics & horticulturae & jzbg & network & quantumrep & thermo\\
-applmech & cimb & encyclopedia & hospitals & kidneydial & neuroglia & quaternary & tomography\\
-applmicrobiol & civileng & endocrines & humanities & kinasesphosphatases & neurolint & qubs & tourismhosp\\
-applnano & cleantechnol & energies & humans & knowledge & neurosci & radiation & toxics\\
-applsci & climate & eng & hydrobiology & land & nitrogen & reactions & toxins\\
-\addlinespace
-aquacj & clinpract & engproc & hydrogen & languages & notspecified & receptors & transplantology\\
-architecture & clockssleep & entomology & hydrology & laws & nri & recycling & transportation\\
-arm & cmd & entropy & hygiene & life & nursrep & regeneration & traumacare\\
-arthropoda & coasts & environments & idr & liquids & nutraceuticals & religions & traumas\\
-arts & coatings & environsciproc & ijerph & literature & nutrients & remotesensing & tropicalmed\\
-\addlinespace
-asc & colloids & epidemiologia & ijfs & livers & obesities & reports & universe\\
-asi & colorants & epigenomes & ijgi & logics & oceans & reprodmed & urbansci\\
-astronomy & commodities & est & ijms & logistics & ohbm & resources & uro\\
-atmosphere & compounds & fermentation & ijns & lubricants & onco & rheumato & vaccines\\
-atoms & computation & fibers & ijpb & lymphatics & oncopathology & risks & vehicles\\
-\addlinespace
-audiolres & computers & fintech & ijtm & machines & optics & robotics & venereology\\
-automation & condensedmatter & fire & ijtpp & macromol & oral & ruminants & vetsci\\
-axioms & conservation & fishes & ime & magnetism & organics & safety & vibration\\
-bacteria & constrmater & fluids & immuno & magnetochemistry & organoids & sci & virtualworlds\\
-batteries & cosmetics & foods & informatics & make & osteology & scipharm & viruses\\
-\addlinespace
-bdcc & covid & forecasting & information & marinedrugs & oxygen & sclerosis & vision\\
-behavsci & crops & forensicsci & infrastructures & materials & parasites & seeds & waste\\
-beverages & cryptography & forests & inorganics & materproc & parasitologia & sensors & water\\
-biochem & crystals & foundations & insects & mathematics & particles & separations & wem\\
-bioengineering & csmf & fractalfract & instruments & mca & pathogens & sexes & wevj\\
-\addlinespace
-biologics & ctn & fuels & inventions & measurements & pathophysiology & signals & wind\\
-biology & curroncol & future & iot & medicina & pediatrrep & sinusitis & women\\
-biomass & cyber & futureinternet & j & medicines & pharmaceuticals & skins & world\\
-biomechanics & dairy & futurepharmacol & jal & medsci & pharmaceutics & smartcities & youth\\
-biomed & data & futurephys & jcdd & membranes & pharmacoepidemiology & sna & zoonoticdis\\
-\addlinespace
-biomedicines & ddc & futuretransp & jcm & merits & pharmacy & societies & \\
+agriculture & air & biologics & clinpract & dairy & ecologies & gases & NOx\_HH\\
+agriengineering & algorithms & biology & clockssleep & data & education & C6H6 & O3\_HH\\
+agrochemicals & atmosphere & biophysica & cmd & ddc & environments & CO\_HH & PM10\\
+agronomy & biochem & carbon & covid & earth & environsciproc & NO\_HH & PM25\\
+ai & bioengineering & climate & crops & ebj & epidemiologia & N02\_HH & S02\_HH\\
 \bottomrule
 \end{longtable}
 \finishlandscape
 
-\hypertarget{introduction}{%
-\section{Introduction}\label{introduction}}
+\hypertarget{introducciuxf3n}{%
+\section{Introducción}\label{introducciuxf3n}}
 
-The introduction should briefly place the study in a broad context and
-highlight why it is important. It should define the purpose of the work
-and its significance. The current state of the research field should be
-reviewed carefully and key publications cited. Please highlight
-controversial and diverging hypotheses when necessary. Finally, briefly
-mention the main aim of the work and highlight the principal
-conclusions. As far as possible, please keep the introduction
-comprehensible to scientists outside your particular field of research.
-Citing a journal paper
-\citep{bertrand-krajewski_distribution_1998, leutnant_stormwater_2016}.
-And now citing a book reference \citet{gujer_systems_2008}. Some MDPI
-journals use Chicago and others use APA, this template should choose the
-correct citation format for you once you specify the journal in the YAML
-header.
+Dentro del marco del Plan Nacional del Instituto Nacional de Estadística
+(INE) se encuentra el Estudio Estadístico para la Evaluación de la
+Calidad del Aire, además cuenta con un visor en tiempo real que
+determina el Índice de Calidad del Aire (ICA) de toda España.
 
-To use endnotes, change \texttt{endnotes:\ true} in the YAML header,
-then use \texttt{\textbackslash{}endnote\{This\ is\ an\ endnote.\}}.
+El ICA clasifica la calidad del aire en 6 categorías: buena,
+razonablemente buena, regular, desfavorable, muy desfavorable y
+extremadamente desfavorable. A cada estación se le asigna la categoría
+más baja en términos de calidad del aire considerando cualquier
+contaminante que se evalúe. Los contaminantes incluidos en el índice son
+las Partículas en Suspensión (PM10), Partículas en Suspensión más finas
+(PM2,5), Ozono Troposférico (O3), Dióxido de Nitrógeno (NO2) y Dióxido
+de Azufre (SO2).
 
-\hypertarget{materials-and-methods}{%
-\section{Materials and Methods}\label{materials-and-methods}}
+Todo lo relacionado con el cálculo y límites establecidos del ICA se
+encuentra legislado por la Resolución del 2 de septiembre de 2020, de la
+Dirección General de Calidad y Evaluación Ambiental, por la que se
+modifica el Anexo de la Orden TEC/351/2019, de 18 de marzo, y por la que
+se aprueba el Índice Nacional de Calidad del Aire. Esta resolución
+incluye un anexo con la metodología para el cálculo del ICA.
 
-Materials and Methods should be described with sufficient details to
-allow others to replicate and build on published results. Please note
-that publication of your manuscript implicates that you must make all
-materials, data, computer code, and protocols associated with the
-publication available to readers. Please disclose at the submission
-stage any restrictions on the availability of materials or information.
-New methods and protocols should be described in detail while
-well-established methods can be briefly described and appropriately
-cited.
+\hypertarget{procesamiento-de-datos}{%
+\section{Procesamiento de Datos}\label{procesamiento-de-datos}}
 
-Research manuscripts reporting large datasets that are deposited in a
-publicly available database should specify where the data have been
-deposited and provide the relevant accession numbers. If the accession
-numbers have not yet been obtained at the time of submission, please
-state that they will be provided during review. They must be provided
-prior to publication.
+Este trabajo se centra en el procesamiento de datos en el ámbito del
+análisis de la calidad del aire, abordando un conjunto de datos
+recopilados durante los años 2018-2022. Inicialmente, el dataset
+presentaba desafíos inherentes, como la presencia de valores faltantes y
+una estructura no tidy. La tarea principal consistió en transformar esta
+información en un formato ``tidy'' para garantizar la coherencia de los
+datos.
 
-Interventionary studies involving animals or humans, and other studies
-require ethical approval must list the authority that provided approval
-and the corresponding ethical approval code.
+Con un total de nueve archivos CSV por año que detallan parámetros de
+mediciones horarias del aire, así como, un archivo de metadatos de cada
+año con información relevante sobre las estaciones, el dataset depurado
+establece una base sólida para análisis estadísticos univariantes y
+bivariantes que nos permitirán abordar el estudio del ICA en los últimos
+cinco años en la Comunidad Autónoma de Valencia. Por lo que se establece
+como objetivo en el procesamiento de los datos el compilar la mayor
+información posible para poder obtener el ICA como variable categórica y
+sacar conclusiones.
+
+\hypertarget{formato-tidy}{%
+\section{Formato tidy}\label{formato-tidy}}
+
+En un primer paso, emprendemos la tarea de obtener un conjunto de datos
+consolidado a partir de nuestros registros. Este proceso implica un
+análisis detallado de cada año, con el objetivo de integrar las columnas
+correspondientes a las observaciones diarias de diversos agentes
+químicos del aire presentes en cada hoja de Excel. En concreto,
+disponemos de medidas de Partículas en suspensión (PM10 y PM2,5), Ozono
+troposférico (O3), Dióxido de nitrógeno (NO2), Dióxido de azufre (SO2),
+Benzeno (C6H6), Monóxido de Carbono (CO), Monóxido de Nitrógeno (NO) y
+Óxidos de Nitrógeno (NOx), cada una de las variables en un CSV
+diferente. La finalidad es fusionar estas columnas en una única entidad
+independiente que contenga todas las observaciones de dicho parámetro
+durante los cinco años contemplados en el estudio, además de añadirle
+más variables procedentes de los metadatos de las estaciones.
+
+Este enfoque permite la generación de un conjunto de datos estructurado
+de manera ``tidy'', donde cada variable se representa en una columna
+individual y cada observación de una variable ocupa una fila
+independiente. La consolidación de las diversas tablas y CSV se lleva a
+cabo considerando las variables comunes, es decir, los parámetros del
+aire analizados. Como resultado, nuestro nuevo dataset presenta una
+primera fila que contiene los nombres representativos de las variables,
+estableciendo así un marco coherente para el análisis subsiguiente.
+
+Cada archivo se encuentra estructurado originalmente de la siguiente
+manera:
+
+\begin{tabular}{r|r|r|r|l|r|r|r|r|r|r|r|r|r|r|r|r|r|r|r|r|r|r|r|r|r|r|r|r|r|r|r}
+\hline
+PROVINCIA & MUNICIPIO & ESTACION & MAGNITUD & PUNTO\_MUESTREO & ANNO & MES & DIA & H01 & H02 & H03 & H04 & H05 & H06 & H07 & H08 & H09 & H10 & H11 & H12 & H13 & H14 & H15 & H16 & H17 & H18 & H19 & H20 & H21 & H22 & H23 & H24\\
+\hline
+1 & 22 & 1 & 8 & 01022001\_8\_8 & 2018 & 1 & 1 & 2 & 0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 & NA & 2 & 2 & 1 & 2 & 3 & 3 & 3 & 4 & 3 & 3 & 3 & 3 & 2\\
+\hline
+1 & 22 & 1 & 8 & 01022001\_8\_8 & 2018 & 1 & 2 & 2 & 3 & 1 & 1 & 1 & 1 & 2 & 3 & 3 & 3 & 3 & 4 & 4 & 3 & 3 & 3 & 3 & 4 & 2 & 4 & 3 & 3 & 3 & 3\\
+\hline
+1 & 22 & 1 & 8 & 01022001\_8\_8 & 2018 & 1 & 3 & 1 & 1 & 1 & 1 & 1 & 1 & 2 & 3 & 3 & 3 & 4 & 1 & 3 & 5 & 4 & 5 & 5 & 5 & 5 & 5 & 5 & 5 & 5 & 4\\
+\hline
+1 & 22 & 1 & 8 & 01022001\_8\_8 & 2018 & 1 & 4 & 3 & 3 & 2 & 2 & 2 & 1 & 2 & 3 & 3 & 3 & 3 & 2 & 1 & 2 & 1 & 3 & 3 & 3 & 3 & 3 & 3 & 3 & 3 & 2\\
+\hline
+1 & 22 & 1 & 8 & 01022001\_8\_8 & 2018 & 1 & 5 & 1 & 1 & 1 & 1 & 1 & 1 & 1 & 4 & 4 & 5 & 6 & 5 & 5 & 6 & 6 & 5 & 4 & 5 & 9 & 12 & 10 & 6 & 3 & 3\\
+\hline
+1 & 22 & 1 & 8 & 01022001\_8\_8 & 2018 & 1 & 11 & 2 & 1 & 0 & 0 & 0 & 1 & 2 & 4 & 5 & 4 & 5 & 5 & 5 & 5 & 5 & 5 & 7 & 6 & 6 & 5 & 7 & 9 & 6 & 4\\
+\hline
+\end{tabular}
+
+En la que cada observación corresponde a la medición de las diferentes
+estaciones de medida de toda España, por lo que inicialmente se filtran
+los valores a los correspondientes a la CA de Valencia y se restructura
+para conseguir el valor de la variable en una única columna a lo largo
+del tiempo.Al ser datos horarios, y para poder establecer diariamente el
+peor ICA obtenido, se decide computar el valor de la variable como el
+máximo medido en 24 horas.
+
+Una vez cargados los dataset, se unen entre ellos para obtener un
+conjunto de datos en el que las variables estan repartidas en cada
+columna:
+
+\begin{tabular}{l|r|r|r|r|r|r|r|r|r|r|r}
+\hline
+Fecha & MUNICIPIO & PROVINCIA & ESTACION & C6H6.num & CO.num & NO2.num & NOx.num & O3.num & PM10.num & PM25.num & SO2.num\\
+\hline
+2022-01-01 & 5 & 12 & 5 & NA & 0.1 & 26 & NA & 63 & 34 & 9 & NA\\
+\hline
+2022-01-01 & 9 & 3 & 6 & NA & 0.1 & 22 & NA & 60 & NA & NA & 11\\
+\hline
+2022-01-01 & 9 & 12 & 7 & NA & 0.2 & 46 & NA & 58 & 46 & 46 & 6\\
+\hline
+2022-01-01 & 10 & 46 & 1 & NA & 0.2 & 15 & NA & 48 & 8 & 8 & 4\\
+\hline
+2022-01-01 & 14 & 3 & 6 & 2.1 & 0.5 & 64 & NA & 72 & NA & NA & 4\\
+\hline
+2022-01-01 & 14 & 3 & 8 & NA & NA & 61 & NA & 72 & NA & NA & 3\\
+\hline
+\end{tabular}
+
+Posteriormente se cargan los metadatos correspondientes a cada año y
+añadimos las variables de Tipo de Área (Urbana, Suburbana y Rural),
+Latitud y Longitud de la estación de medida, y los nombres del Municipio
+y Provincia donde se encuentran.
+
+\begin{tabular}{l|l|r|r|l|l|r|r|r|r|r|r|r|r|r|r}
+\hline
+N\_PROVINCIA & N\_MUNICIPIO & LATITUD\_G & LONGITUD\_G & TIPO\_AREA & Fecha & ESTACION & C6H6.num & CO.num & NO.num & NO2.num & NOx.num & O3.num & PM10.num & PM25.num & SO2.num\\
+\hline
+CASTELLÓN/CASTELLÓ & TORRE ENDOMÉNECH & 40.26944 & -0.07889 & RURAL & 2018-07-29 & 1 & NA & NA & NA & NA & NA & 98 & NA & NA & NA\\
+\hline
+CASTELLÓN/CASTELLÓ & TORRE ENDOMÉNECH & 40.26944 & -0.07889 & RURAL & 2018-02-15 & 1 & NA & NA & NA & NA & NA & 68 & NA & NA & NA\\
+\hline
+CASTELLÓN/CASTELLÓ & TORRE ENDOMÉNECH & 40.26944 & -0.07889 & RURAL & 2018-11-14 & 1 & NA & NA & NA & NA & NA & 89 & NA & NA & NA\\
+\hline
+CASTELLÓN/CASTELLÓ & TORRE ENDOMÉNECH & 40.26944 & -0.07889 & RURAL & 2018-08-02 & 1 & NA & NA & NA & NA & NA & 99 & NA & NA & NA\\
+\hline
+CASTELLÓN/CASTELLÓ & TORRE ENDOMÉNECH & 40.26944 & -0.07889 & RURAL & 2018-11-24 & 1 & NA & NA & NA & NA & NA & 84 & NA & NA & NA\\
+\hline
+CASTELLÓN/CASTELLÓ & TORRE ENDOMÉNECH & 40.26944 & -0.07889 & RURAL & 2018-08-27 & 1 & NA & NA & NA & NA & NA & 84 & NA & NA & NA\\
+\hline
+\end{tabular}
+
+En un primer análisis rápido de las variables observamos una gran
+cantidad de valores perdidos,
+
+\includegraphics{ProyectoAED2023_files/figure-latex/unnamed-chunk-5-1.pdf}
+
+\begin{verbatim}
+## 
+##  Variables sorted by number of missings: 
+##  Variable Count
+##  C6H6.num 91293
+##  PM10.num 56927
+##    CO.num 53920
+##    NO.num 47859
+##   NOx.num 27331
+##   NO2.num 14397
+##    O3.num  4311
+##     Fecha     0
+##  ESTACION     0
+\end{verbatim}
+
+esto es debido a que no en todas las estaciones se miden las mismas
+variables, para solucionar esto, lo establecido en la metodología es
+usar el valor de la estación más próxima, por ello y para preparar los
+datos, se transforma la latitud y longitud a coordenadas proyectadas, de
+esta manera nos garantizamos poder usar distancias euclideas en caso de
+imputación por proximidad, además se pasan las fecha a días desde el
+01-01-2018, que es la fecha de la primera observación de nuestro
+conjunto, para establecer una tercera dimensión de proximidad en tiempo.
+Por último se categoriza la variable de Tipo de Area donde se encuentra
+la estación.
+
+\hypertarget{limpieza-de-datos}{%
+\section{Limpieza de datos}\label{limpieza-de-datos}}
+
+Una vez adquirido un conjunto de datos organizado en formato tidy, es
+necesario llevar a cabo un proceso de limpieza. Este procedimiento
+implica la evaluación minuciosa de cada inconsistencia, tales como los
+valores faltantes (NAs) y los valores atípicos (outliers). Con el
+propósito de abordar estas discrepancias, se implementan diversos
+procedimientos y técnicas especializadas.
+
+\hypertarget{outliers-revisar-esto-la-regla-del-3-sigma-es-para-distribuciones-gaussianas-yo-la-quitaba}{%
+\subsection{Outliers (revisar esto, la regla del 3 sigma es para
+distribuciones gaussianas, yo la
+quitaba)}\label{outliers-revisar-esto-la-regla-del-3-sigma-es-para-distribuciones-gaussianas-yo-la-quitaba}}
+
+Como es ampliamente conocido, un ``outlier'' se define como un valor
+atípico en un conjunto de datos que exhibe una marcada disparidad con
+respecto al resto de las observaciones. Para analizar la presencia de
+tales observaciones atípicas, se emplean tres técnicas específicas: la
+regla de 3 sigma, la regla de Hampel, la regla de boxplot y la regla de
+los percentiles. Obtuvimos la siguiente tabla:
+
+Aquí utilizamos los códigos implementados anteriormente en cada una de
+las variables numéricas para detectar los outliers
+
+\begin{verbatim}
+##    Chemical_Element    Method Outliers_Count
+## 1           NO2.num   3-Sigma            803
+## 2           NO2.num       IQR           1789
+## 3           NO2.num    Hampel            301
+## 4           NO2.num Percentil            709
+## 5           NOx.num   3-Sigma            725
+## 6           NOx.num       IQR           1379
+## 7           NOx.num    Hampel           1658
+## 8           NOx.num Percentil           6215
+## 9            O3.num   3-Sigma            789
+## 10           O3.num       IQR           2191
+## 11           O3.num    Hampel           2169
+## 12           O3.num Percentil           7247
+## 13         PM10.num   3-Sigma           1750
+## 14         PM10.num       IQR           8298
+## 15         PM10.num    Hampel            353
+## 16         PM10.num Percentil           2435
+## 17         PM25.num   3-Sigma           2336
+## 18         PM25.num       IQR          10336
+## 19         PM25.num    Hampel           6661
+## 20         PM25.num Percentil           6048
+## 21          SO2.num   3-Sigma           8916
+## 22          SO2.num       IQR           3644
+## 23          SO2.num    Hampel           3496
+## 24          SO2.num Percentil           3768
+\end{verbatim}
+
+\begin{verbatim}
+## # A tibble: 6 x 5
+##   Chemical_Element `3-Sigma`   IQR Hampel Percentil
+##   <chr>                <int> <int>  <int>     <int>
+## 1 NO2.num                803  1789    301       709
+## 2 NOx.num                725  1379   1658      6215
+## 3 O3.num                 789  2191   2169      7247
+## 4 PM10.num              1750  8298    353      2435
+## 5 PM25.num              2336 10336   6661      6048
+## 6 SO2.num               8916  3644   3496      3768
+\end{verbatim}
+
+En esta tabla visualizamos un recuento de la cantidad de outliers
+detectados con cada método.
+
+Ahora bien, tenemos que analizar que consideramos un valor atípico en
+nuestro caso. Para ello, debemos establecer algún criterio. Después de
+documentarnos, encontramos en el BOE (Boletín oficial del Estado) la
+siguiente tabla:
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 10\tabcolsep) * \real{0.1379}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 10\tabcolsep) * \real{0.1207}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 10\tabcolsep) * \real{0.1034}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 10\tabcolsep) * \real{0.1207}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 10\tabcolsep) * \real{0.1379}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 10\tabcolsep) * \real{0.3793}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+\(S0_{2}\)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+PM2,5
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+PM10
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+\(O_{3}\)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+\(NO_{2}\)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+CATEGORÍA DEL ÍNDICE
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+751-1250 & 76-800 & 151-1200 & 381-800 & 341-1000 & Extremadamente
+Desfavorable \\
+\end{longtable}
+
+Para utilizar la detección de valores atípicos y asignarles esta
+categoría, en nuestro caso calculamos tanto el valor máximo como el
+mínimo para cada uno de los parámetros químicos. Este proceso nos
+permite evaluar si dichos valores caen fuera del rango establecido en la
+tabla anterior, lo que justificaría su clasificación como outliers. Tras
+realizar estos cálculos, hemos verificado que los valores identificados
+como outliers son válidos y, por ende, hemos decidido mantenerlos en el
+conjunto de datos.
+
+\hypertarget{imputaciuxf3n-nas}{%
+\subsection{Imputación NAs}\label{imputaciuxf3n-nas}}
+
+El siguiente paso en el proceso de limpieza de nuestro conjunto de datos
+implica la imputación de los valores faltantes, comúnmente conocidos
+como NAs. Para abordar esta tarea, hemos estudiado diversas técnicas en
+clase, entre las cuales se incluyen: la eliminación de datos, la
+imputación con un valor estimado basado en los valores conocidos, la
+imputación mediante un modelo predictivo o la imputación al valor más
+cercano utilizando el algoritmo KNN (k-vecinos más cercanos).
+
+Para ello se realiza un análisis preliminar de los datos, calculando las
+correlaciones entre variables.
+
+A pesar de que el ICA solo usa 5 de las 9 variables que disponemmos, se
+ha decidido dejarlas inicialmente por si exsite alguna relación que las
+conviertan en posibles predictores de datos faltantes, por lo que
+analizamos las covarianzas y correlaciones entre ellos,
+
+\includegraphics{ProyectoAED2023_files/figure-latex/unnamed-chunk-12-1.pdf}
+
+\begin{tabular}{l|r|r|r|r|r|r|r|r|r}
+\hline
+  & ESTACION & C6H6.num & CO.num & NO.num & NO2.num & NOx.num & O3.num & PM10.num & PM25.num\\
+\hline
+ESTACION & 0 & 0.000000 & 0.0000000 & 0.000000 & 0.00000 & 0.00000 & 0.000000 & 0.000000 & 0.0000000\\
+\hline
+C6H6.num & 0 & 24.729670 & 0.5724250 & 152.218391 & 63.75446 & 289.77848 & -42.419587 & 47.900037 & 29.5360571\\
+\hline
+CO.num & 0 & 0.572425 & 0.0489320 & 7.127909 & 3.30182 & 14.00281 & -1.905907 & 2.019528 & 0.9951127\\
+\hline
+NO.num & 0 & 152.218391 & 7.1279094 & 2528.283413 & 882.25600 & 4661.00488 & -619.266677 & 501.070818 & 297.5710857\\
+\hline
+NO2.num & 0 & 63.754455 & 3.3018198 & 882.255998 & 532.65585 & 1834.45137 & -188.779011 & 287.428304 & 158.7820322\\
+\hline
+NOx.num & 0 & 289.778482 & 14.0028126 & 4661.004883 & 1834.45137 & 8825.49803 & -1095.762364 & 1030.169405 & 591.3633680\\
+\hline
+O3.num & 0 & -42.419587 & -1.9059066 & -619.266677 & -188.77901 & -1095.76236 & 511.685364 & -45.327732 & -38.3192311\\
+\hline
+PM10.num & 0 & 47.900037 & 2.0195275 & 501.070818 & 287.42830 & 1030.16941 & -45.327732 & 600.269287 & 243.9767201\\
+\hline
+PM25.num & 0 & 29.536057 & 0.9951127 & 297.571086 & 158.78203 & 591.36337 & -38.319231 & 243.976720 & 180.3501367\\
+\hline
+\end{tabular}
+
+observandose una fuerte correlación entre los Óxidos Nitroso.
+
+\includegraphics{ProyectoAED2023_files/figure-latex/unnamed-chunk-13-1.pdf}
+
+y decidiendose usar las variables NO y NOx para inferir los datos
+faltantes del NO2, compuesto necesario para calcular el ICA.
+
+Tras analizar los datos de NOx y NO se observa que no existen datos en
+los años 2021 y 2022 por lo que se acota la posibilidad de inferencia
+del 2018 al 2020.
+
+De manera que se entrena un modelo lineal múltiple con los siguientes
+resultados para el conjunto de test:
+
+\begin{verbatim}
+## 
+## Call:
+## lm(formula = NO2.num ~ NOx.num + NO.num, data = train)
+## 
+## Residuals:
+##      Min       1Q   Median       3Q      Max 
+## -299.857   -1.785   -0.898    0.571   89.250 
+## 
+## Coefficients:
+##              Estimate Std. Error t value Pr(>|t|)    
+## (Intercept)  1.857341   0.042225   43.99   <2e-16 ***
+## NOx.num      0.972210   0.001436  676.94   <2e-16 ***
+## NO.num      -1.436337   0.002939 -488.78   <2e-16 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Residual standard error: 5.205 on 40648 degrees of freedom
+##   (6786 observations deleted due to missingness)
+## Multiple R-squared:  0.9574, Adjusted R-squared:  0.9574 
+## F-statistic: 4.573e+05 on 2 and 40648 DF,  p-value: < 2.2e-16
+\end{verbatim}
+
+\begin{verbatim}
+## RMSE con el conjunto de test=  4.935691
+\end{verbatim}
+
+\includegraphics{ProyectoAED2023_files/figure-latex/unnamed-chunk-14-1.pdf}
+\includegraphics{ProyectoAED2023_files/figure-latex/unnamed-chunk-14-2.pdf}
+\includegraphics{ProyectoAED2023_files/figure-latex/unnamed-chunk-14-3.pdf}
+\includegraphics{ProyectoAED2023_files/figure-latex/unnamed-chunk-14-4.pdf}
+
+El problema es que la mayoría de estaciones que no obtienen los datos de
+NO2 tampoco los obtiene de la familia de los Óxidos Nitrosos.
+
+Es por ello que se decide imputar por proximidad geográfica y en el
+tiempo los datos de los Óxidos Nitrosos para posteriormente usarlo para
+inferir los datos del NO2 con el modelo entrenado.
+
+Para finalizar se imputan el resto de datos faltantes por proximidad
+geográfica y temporal y se eliminan las variables que no necesitamos
+para el cálculo del ICA.
+
+\hypertarget{calculo-ica.aquuxed-se-debe-meter-el-cuxf3digo-para-calcular-el-ica-de-cada-variable}{%
+\subsection{Calculo ICA.Aquí se debe meter el código para calcular el
+ICA de cada
+variable}\label{calculo-ica.aquuxed-se-debe-meter-el-cuxf3digo-para-calcular-el-ica-de-cada-variable}}
+
+Una vez se obtiene el valor categórico de cada variable, se establece el
+Indice global diario como el peor de los individuales.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{df }\OtherTok{\textless{}{-}} \FunctionTok{read\_csv}\NormalTok{(}\StringTok{"../data/dataset\_final.csv"}\NormalTok{, }
+    \AttributeTok{col\_types =} \FunctionTok{cols}\NormalTok{(}\AttributeTok{...1 =} \FunctionTok{col\_skip}\NormalTok{(), }\AttributeTok{...2 =} \FunctionTok{col\_skip}\NormalTok{(), }
+        \AttributeTok{Fecha =} \FunctionTok{col\_date}\NormalTok{(}\AttributeTok{format =} \StringTok{"\%Y{-}\%m{-}\%d"}\NormalTok{)))}
+\NormalTok{levels}\OtherTok{\textless{}{-}}\FunctionTok{c}\NormalTok{(}\StringTok{\textquotesingle{}Buena\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}Razonablemente Buena\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}Regular\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}Desfavorable\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}Muy desfavorable\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}Extremadamente desfavorable\textquotesingle{}}\NormalTok{)}
+\NormalTok{df}\OtherTok{\textless{}{-}}\NormalTok{df}\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{mutate}\NormalTok{(}\AttributeTok{TIPO\_AREA=}\FunctionTok{as.factor}\NormalTok{(TIPO\_AREA))}\SpecialCharTok{\%\textgreater{}\%}\FunctionTok{mutate}\NormalTok{(}\FunctionTok{across}\NormalTok{(}\FunctionTok{c}\NormalTok{(}\FunctionTok{ends\_with}\NormalTok{(}\StringTok{\textquotesingle{}.cat\textquotesingle{}}\NormalTok{)), factor,}\AttributeTok{level=}\NormalTok{levels))}\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{mutate}\NormalTok{(}\AttributeTok{ICA=}\FunctionTok{factor}\NormalTok{(ICA,}\AttributeTok{level=}\NormalTok{levels))}
+\FunctionTok{kable}\NormalTok{(}\FunctionTok{head}\NormalTok{(df))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{tabular}{l|l|l|l|r|r|r|r|r|r|r|r|r|l|l|l|l|l|l|l}
+\hline
+N\_PROVINCIA & N\_MUNICIPIO & TIPO\_AREA & Fecha & ESTACION & NO2.num & O3.num & PM10.num & PM25.num & SO2.num & Dias & X\_UTM30N & Y\_UTM30N & geometry & NO2.cat & O3.cat & PM10.cat & PM25.cat & SO2.cat & ICA\\
+\hline
+CASTELLÓN/CASTELLÓ & TORRE ENDOMÉNECH & RURAL & 2018-07-29 & 1 & 7 & 98 & 28 & 24 & 4 & 209 & 748380.2 & 4461758 & c(748380.171727976, 4461757.68088724) & Buena & Razonablemente Buena & Razonablemente Buena & Regular & Buena & Regular\\
+\hline
+CASTELLÓN/CASTELLÓ & TORRE ENDOMÉNECH & RURAL & 2018-02-15 & 1 & 30 & 68 & 16 & 10 & 3 & 45 & 748380.2 & 4461758 & c(748380.171727976, 4461757.68088724) & Buena & Razonablemente Buena & Buena & Buena & Buena & Razonablemente Buena\\
+\hline
+CASTELLÓN/CASTELLÓ & TORRE ENDOMÉNECH & RURAL & 2018-11-14 & 1 & 38 & 89 & 22 & 15 & 3 & 317 & 748380.2 & 4461758 & c(748380.171727976, 4461757.68088724) & Buena & Razonablemente Buena & Razonablemente Buena & Razonablemente Buena & Buena & Razonablemente Buena\\
+\hline
+CASTELLÓN/CASTELLÓ & TORRE ENDOMÉNECH & RURAL & 2018-08-02 & 1 & 7 & 99 & 49 & 44 & 4 & 213 & 748380.2 & 4461758 & c(748380.171727976, 4461757.68088724) & Buena & Razonablemente Buena & Regular & Desfavorable & Buena & Desfavorable\\
+\hline
+CASTELLÓN/CASTELLÓ & TORRE ENDOMÉNECH & RURAL & 2018-11-24 & 1 & 38 & 84 & 4 & 3 & 3 & 327 & 748380.2 & 4461758 & c(748380.171727976, 4461757.68088724) & Buena & Razonablemente Buena & Buena & Buena & Buena & Razonablemente Buena\\
+\hline
+CASTELLÓN/CASTELLÓ & TORRE ENDOMÉNECH & RURAL & 2018-08-27 & 1 & 13 & 84 & 22 & 14 & 4 & 238 & 748380.2 & 4461758 & c(748380.171727976, 4461757.68088724) & Buena & Razonablemente Buena & Razonablemente Buena & Razonablemente Buena & Buena & Razonablemente Buena\\
+\hline
+\end{tabular}
+
+\hypertarget{anuxe1lisis-univariante}{%
+\section{Análisis Univariante}\label{anuxe1lisis-univariante}}
+
+En esta sección, procederemos a llevar a cabo un análisis univariante
+sobre el conjunto de datos previamente procesado. El propósito principal
+de esta evaluación consiste en examinar individualmente cada variable
+presente en el dataset, con el objetivo de obtener un panorama detallado
+de su distribución y variabilidad.
+
+En primer lugar, para tener una visión global de este dataset sacamos un
+resumen estadístico
+
+\begin{verbatim}
+##  N_PROVINCIA        N_MUNICIPIO            TIPO_AREA         Fecha           
+##  Length:98422       Length:98422       RURAL    :23413   Min.   :2018-01-01  
+##  Class :character   Class :character   SUBURBANA:44449   1st Qu.:2019-04-07  
+##  Mode  :character   Mode  :character   URBANA   :30560   Median :2020-07-06  
+##                                                          Mean   :2020-07-04  
+##                                                          3rd Qu.:2021-10-04  
+##                                                          Max.   :2022-12-31  
+##     ESTACION         NO2.num           O3.num         PM10.num     
+##  Min.   : 1.000   Min.   :  1.00   Min.   :  1.0   Min.   :  1.00  
+##  1st Qu.: 1.000   1st Qu.:  9.00   1st Qu.: 74.0   1st Qu.: 12.00  
+##  Median : 3.000   Median : 21.00   Median : 88.0   Median : 22.00  
+##  Mean   : 9.192   Mean   : 27.91   Mean   : 88.6   Mean   : 29.34  
+##  3rd Qu.: 8.000   3rd Qu.: 41.00   3rd Qu.:103.0   3rd Qu.: 37.00  
+##  Max.   :54.000   Max.   :229.00   Max.   :207.0   Max.   :757.00  
+##     PM25.num         SO2.num             Dias         X_UTM30N     
+##  Min.   :  0.00   Min.   :  1.000   Min.   :   0   Min.   :647644  
+##  1st Qu.:  7.00   1st Qu.:  3.000   1st Qu.: 461   1st Qu.:715944  
+##  Median : 12.00   Median :  4.000   Median : 917   Median :725781  
+##  Mean   : 15.42   Mean   :  6.359   Mean   : 916   Mean   :723388  
+##  3rd Qu.: 19.00   3rd Qu.:  6.000   3rd Qu.:1372   3rd Qu.:739720  
+##  Max.   :296.00   Max.   :239.000   Max.   :1825   Max.   :785582  
+##     Y_UTM30N         geometry                                NO2.cat     
+##  Min.   :4207346   Length:98422       Buena                      :73677  
+##  1st Qu.:4316834   Class :character   Razonablemente Buena       :22851  
+##  Median :4380180   Mode  :character   Regular                    : 1678  
+##  Mean   :4372626                      Desfavorable               :  216  
+##  3rd Qu.:4427433                      Muy desfavorable           :    0  
+##  Max.   :4513195                      Extremadamente desfavorable:    0  
+##                          O3.cat                             PM10.cat    
+##  Buena                      : 3477   Buena                      :45050  
+##  Razonablemente Buena       :66563   Razonablemente Buena       :32606  
+##  Regular                    :25929   Regular                    : 7181  
+##  Desfavorable               : 2453   Desfavorable               :11447  
+##  Muy desfavorable           :    0   Muy desfavorable           : 1478  
+##  Extremadamente desfavorable:    0   Extremadamente desfavorable:  660  
+##                         PM25.cat                            SO2.cat     
+##  Buena                      :44243   Buena                      :98334  
+##  Razonablemente Buena       :31682   Razonablemente Buena       :   86  
+##  Regular                    : 7987   Regular                    :    2  
+##  Desfavorable               :11839   Desfavorable               :    0  
+##  Muy desfavorable           : 1686   Muy desfavorable           :    0  
+##  Extremadamente desfavorable:  985   Extremadamente desfavorable:    0  
+##                           ICA       
+##  Buena                      :  552  
+##  Razonablemente Buena       :46805  
+##  Regular                    :27844  
+##  Desfavorable               :18838  
+##  Muy desfavorable           : 2841  
+##  Extremadamente desfavorable: 1542
+\end{verbatim}
+
+Una vez obtenidos los estadísticos. Visualizamos nuestras variables.
+
+\includegraphics{ProyectoAED2023_files/figure-latex/unnamed-chunk-20-1.pdf}
+
+La representación gráfica previa proporciona una visión general de la
+concentración de cada elemento en nuestro conjunto de datos. La
+representación más notable en términos de su estructura y forma
+corresponde al elemento \(O_{3}\), ya que parece seguir una distribución
+gaussiana. Los datos están distribuidos de manera uniforme a lo largo
+del eje x, que representa la concentración, y muestran una distribución
+alrededor de la media y la mediana, ambas con valores muy similares,
+como se confirmó en los estadísticos previamente descritos. (88.60 y
+88.00 respectivamente).
+
+En contraste, las representaciones de los otros elementos exhiben una
+asimetría significativa, con valores relativamente altos al principio
+seguidos de una disminución. Estas observaciones son respaldadas
+numéricamente por los estadísticos calculados anteriormente. Por
+ejemplo, al considerar el elemento \(S0_{2}\), se observa un valor
+máximo de 239,000. Sin embargo, la media calculada es de 6,359, un valor
+considerablemente distante del máximo mencionado. Además, el valor
+mínimo es 1, mientras que la mediana es 4,000. Estas discrepancias
+justifican la representación gráfica de esta información. Esto mismo
+sucedería con los elementos restantes.
+
+A continuación, procederemos a visualizar la evolución de los compuestos
+químicos a lo largo del tiempo, con el objetivo de realizar un análisis
+más exhaustivo sobre la calidad del aire.
+
+\includegraphics{ProyectoAED2023_files/figure-latex/unnamed-chunk-21-1.pdf}
+\includegraphics{ProyectoAED2023_files/figure-latex/unnamed-chunk-21-2.pdf}
+\includegraphics{ProyectoAED2023_files/figure-latex/unnamed-chunk-21-3.pdf}
+\includegraphics{ProyectoAED2023_files/figure-latex/unnamed-chunk-21-4.pdf}
+\includegraphics{ProyectoAED2023_files/figure-latex/unnamed-chunk-21-5.pdf}
+\includegraphics{ProyectoAED2023_files/figure-latex/unnamed-chunk-21-6.pdf}
+
+\includegraphics{ProyectoAED2023_files/figure-latex/unnamed-chunk-22-1.pdf}
+
+\includegraphics{ProyectoAED2023_files/figure-latex/unnamed-chunk-23-1.pdf}
+
+\includegraphics{ProyectoAED2023_files/figure-latex/unnamed-chunk-24-1.pdf}
+
+\includegraphics{ProyectoAED2023_files/figure-latex/unnamed-chunk-26-1.pdf}
+
+\includegraphics{ProyectoAED2023_files/figure-latex/unnamed-chunk-27-1.pdf}
+
+Pensar que hacer con los nombres
+
+\includegraphics{ProyectoAED2023_files/figure-latex/unnamed-chunk-28-1.pdf}
+
+\includegraphics{ProyectoAED2023_files/figure-latex/unnamed-chunk-29-1.pdf}
+
+\hypertarget{anuxe1lisis-bivariante}{%
+\section{Análisis Bivariante}\label{anuxe1lisis-bivariante}}
+
+Para realizar el análisis bivariante primer observaremos como se
+relacionan todas las variables entre sí
+
+Primero vamos a realizar un \texttt{ggpairs} y un \texttt{ggcorr}para
+relacionar todos los elementos químicos con todos (valores numéricos)
+
+\includegraphics{ProyectoAED2023_files/figure-latex/unnamed-chunk-31-1.pdf}
+
+\includegraphics{ProyectoAED2023_files/figure-latex/unnamed-chunk-32-1.pdf}
+Como podemos ver, la relación de las variables no es clara. De forma
+general podemos decir que las variables son bastante independientes
+entre sí.Como excepción podríamos hablar de las variables PM10 y PM25
+
+Ahora mostraremos las matrices de covaraianza y correlación con Pearson
+y Spearman
+
+\begin{verbatim}
+## [1] "Matriz de covarianza"
+\end{verbatim}
+
+\begin{verbatim}
+##            NO2.num     O3.num  PM10.num   PM25.num   SO2.num
+## NO2.num  558.50671 -79.413288 159.80303  91.904814 49.402858
+## O3.num   -79.41329 453.671329 -16.17258 -26.902899 -8.273695
+## PM10.num 159.80303 -16.172582 829.28383 232.735487 11.902949
+## PM25.num  91.90481 -26.902899 232.73549 194.558055  5.841597
+## SO2.num   49.40286  -8.273695  11.90295   5.841597 73.528576
+\end{verbatim}
+
+\begin{verbatim}
+## [1] "Matriz de correlacion (Spearman)"
+\end{verbatim}
+
+\begin{verbatim}
+##             NO2.num      O3.num   PM10.num    PM25.num     SO2.num
+## NO2.num   1.0000000 -0.13546859 0.32082787  0.31022061  0.35079803
+## O3.num   -0.1354686  1.00000000 0.01720491 -0.02215115 -0.03290146
+## PM10.num  0.3208279  0.01720491 1.00000000  0.72516556  0.17837261
+## PM25.num  0.3102206 -0.02215115 0.72516556  1.00000000  0.14920745
+## SO2.num   0.3507980 -0.03290146 0.17837261  0.14920745  1.00000000
+\end{verbatim}
+
+\begin{verbatim}
+## [1] "Matriz de correlacion (Pearson)"
+\end{verbatim}
+
+\begin{verbatim}
+##             NO2.num      O3.num    PM10.num    PM25.num     SO2.num
+## NO2.num   1.0000000 -0.15776415  0.23481143  0.27880429  0.24378658
+## O3.num   -0.1577641  1.00000000 -0.02636678 -0.09055320 -0.04530027
+## PM10.num  0.2348114 -0.02636678  1.00000000  0.57941055  0.04820309
+## PM25.num  0.2788043 -0.09055320  0.57941055  1.00000000  0.04884036
+## SO2.num   0.2437866 -0.04530027  0.04820309  0.04884036  1.00000000
+\end{verbatim}
+
+Ya que hemos visto que las variables PM10 y PM25 parece que tengan
+alguna relación, vamos a relacionar sus equivalentes categóricas para
+ver si la hipótesis nula de que son independientes se cumple o no.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{chisq.test}\NormalTok{(df}\SpecialCharTok{$}\NormalTok{PM10.cat, df}\SpecialCharTok{$}\NormalTok{PM25.cat, }\AttributeTok{correct =}\NormalTok{ F)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+##  Pearson's Chi-squared test
+## 
+## data:  df$PM10.cat and df$PM25.cat
+## X-squared = 57030, df = 25, p-value < 2.2e-16
+\end{verbatim}
+
+Podemos ver que el p-valor es muy pequeño, luego podemos rechazar la
+hipótesis de que no están relacionadas.
+
+Este efecto es más grande en las categóricas, ya que ``medimos'' por
+intervalos. Por lo que podemos decir que sí tienen alguna relación entre
+ellas
+
+\hypertarget{no2}{%
+\subsection{NO2}\label{no2}}
+
+\includegraphics{ProyectoAED2023_files/figure-latex/unnamed-chunk-36-1.pdf}
+
+\begin{verbatim}
+##             NO2.num      O3.num    PM10.num    PM25.num     SO2.num
+## NO2.num   1.0000000 -0.15776415  0.23481143  0.27880429  0.24378658
+## O3.num   -0.1577641  1.00000000 -0.02636678 -0.09055320 -0.04530027
+## PM10.num  0.2348114 -0.02636678  1.00000000  0.57941055  0.04820309
+## PM25.num  0.2788043 -0.09055320  0.57941055  1.00000000  0.04884036
+## SO2.num   0.2437866 -0.04530027  0.04820309  0.04884036  1.00000000
+\end{verbatim}
+
+\includegraphics{ProyectoAED2023_files/figure-latex/unnamed-chunk-38-1.pdf}
+
+\includegraphics{ProyectoAED2023_files/figure-latex/unnamed-chunk-39-1.pdf}
+
+\includegraphics{ProyectoAED2023_files/figure-latex/unnamed-chunk-40-1.pdf}
+
+Vamos a mostrar ahora un histograma de la cantidad de días en los cuales
+ha habido cada uno de los diferentes índices de la calidad del aire.
+Para calcular esto debemos coger todas las mediciones de un mismo día y
+quedarnos con la peor, y esta es la calidad de aire para ese día.
+
+\includegraphics{ProyectoAED2023_files/figure-latex/unnamed-chunk-43-1.pdf}
+
+Vamos ahora a probar, por ejemplo, a sacar la misma gráfica usando solo
+los datos de la provincia de València
+
+\includegraphics{ProyectoAED2023_files/figure-latex/unnamed-chunk-44-1.pdf}
+
+Podemos observar que la distribución de los datos parece mantenerse en
+ambos casos. Hay pocos días donde la calidad del aire sea buena. Por
+otro lado el parámetro más frecuente es el de razonablemente buena, a
+partir del cual los sucesivos van bajando hasta llegar a extremadamente
+desfavorable.
+
+\includegraphics{ProyectoAED2023_files/figure-latex/unnamed-chunk-45-1.pdf}
+Con el mosaic plot podemos observar como a pesar de que la cantidad de
+días que el aire tiene una calidad buena no es muy diferente entre las
+zonas, en las zonas rurales hay menos días con calidades peores.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# \# Instalar y cargar las librerías}
+\CommentTok{\# library(sf)}
+\CommentTok{\# library(leaflet)}
+\CommentTok{\# }
+\CommentTok{\# \# Cargar datos desde el archivo JSON}
+\CommentTok{\# ruta\_al\_archivo \textless{}{-} "../data/CV{-}MAP.json"}
+\CommentTok{\# datos\_sf \textless{}{-} st\_read(ruta\_al\_archivo)}
+\CommentTok{\# }
+\CommentTok{\# \# Crear un mapa interactivo con Leaflet}
+\CommentTok{\# mapa \textless{}{-} leaflet() \%\textgreater{}\%}
+\CommentTok{\#   addTiles() \%\textgreater{}\%}
+\CommentTok{\#   addMarkers(data = datos\_sf, \textasciitilde{}X\_UTM30N, \textasciitilde{}Y\_UTM30N, popup = \textasciitilde{}as.character(geometry))}
+\CommentTok{\# }
+\CommentTok{\# \# Mostrar el mapa}
+\CommentTok{\# mapa}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{conclusiones}{%
+\section{Conclusiones}\label{conclusiones}}
 
 \hypertarget{results}{%
 \section{Results}\label{results}}
